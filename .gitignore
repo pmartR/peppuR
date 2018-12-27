@@ -40,4 +40,4 @@ rsconnect/
 .DS*
 
 # covr files
-^\.travis\.yml$
+.travis.yml
