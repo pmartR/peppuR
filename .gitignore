@@ -39,3 +39,5 @@ rsconnect/
 # Mac files
 .DS*
 
+# covr files
+^\.travis\.yml$
