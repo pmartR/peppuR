@@ -260,16 +260,16 @@ MLinput_helper = function(x_df, y_df, sample_cname, outcome_cname, pair_cname) {
     stop(paste(sample_cname, "is not a column of both X and Y", sep = ""))
   }
   
+  # check for missing values in sample ids and outcomes (not allowed)
+  if (any(is.na(x_df[, sample_cname]))) stop("Missing sample names in X")
+  if (any(is.na(y_df[, sample_cname]))) stop("Missing sample names in Y")
+  if (any(is.na(y_df[, outcome_cname]))) stop("Missing outcomes in Y")
+  
   # first need to check that the rows of x_df and the rows of y_df are in the same order
   indices = match(y_df[, sample_cname], x_df[, sample_cname])
   
   # reorder Y to match row order of X
   x_df = x_df[indices, ]
-  
-  # check for missing values in sample ids and outcomes (not allowed)
-  if (any(is.na(x_df[, sample_cname]))) stop("Missing sample names in X")
-  if (any(is.na(y_df[, sample_cname]))) stop("Missing sample names in Y")
-  if (any(is.na(y_df[, outcome_cname]))) stop("Missing outcomes in Y")
   
   # check that pair_cname is in both X and Y and that there is more than one unique thing in pair_cname column
   if (!is.null(pair_cname)) {
