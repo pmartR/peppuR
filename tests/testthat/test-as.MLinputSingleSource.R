@@ -27,15 +27,31 @@ test_that("Categorical checks single source as.MLinput", {
                           outcome_cname = outcome_cname, pair_cname = pair_cname))
   expect_equal(attr(result, "categorical_columns")$categorical_cols,
                c("race", "smoke", "ht", "ui"))
+  expect_equal(attr(as.MLinput(X = birthweight_data[, !colnames(birthweight_data) %in% c("race", "smoke", "ht", "ui")],
+               Y = NULL, meta_colnames = c("low", "ID"),
+               categorical_features = FALSE , sample_cname = sample_cname,
+               outcome_cname = outcome_cname, pair_cname = pair_cname), "categorical_columns")$categorical_cols, NULL)
 })
 
 
 
 test_that("Missing data checks error for single source as.MLinput", {
   birthweight_data$ID[10] <- NA
-  expect_error(as.MLinput(X = missing_ID, Y = NULL, meta_colnames = c("low", "ID"),
+  expect_error(as.MLinput(X = birthweight_data, Y = NULL, meta_colnames = c("low", "ID"),
                           categorical_features = TRUE , sample_cname = sample_cname,
-                          outcome_cname = outcome_cname, pair_cname = pair_cname))
+                          outcome_cname = outcome_cname, pair_cname = pair_cname), "Missing sample names in X")
+  birthweight_data$low[1] <- NA
+  expect_error(as.MLinput(X = birthweight_data[-10,], Y = NULL, meta_colnames = c("low", "ID"),
+                          categorical_features = TRUE , sample_cname = sample_cname,
+                          outcome_cname = outcome_cname, pair_cname = pair_cname), "Missing outcomes in Y")
+  y_df <- birthweight_data[,c("low","ID")]
+  y_df$ID[80] <- NA
+  expect_error(as.MLinput(X = birthweight_data[80:90,-(which(colnames(birthweight_data) == "low"))],
+             Y = y_df[80:90,], meta_colnames = NULL,
+             categorical_features = TRUE , sample_cname = sample_cname,
+             outcome_cname = outcome_cname, pair_cname = pair_cname), "Missing sample names in Y")
+  
+  
 })
 
 test_that("Output for as.MLinput is properly formatted", {
@@ -55,6 +71,9 @@ test_that("Invalid input data throw errors",{
   expect_error(as.MLinput(X = c(1,2,3), Y = birthweight_data[,c("ID", "low")],
                           categorical_features = T, sample_cname,
                           outcome_cname, pair_cname), "X must be of class 'data.frame' or 'list'")
+  expect_error(as.MLinput(X = birthweight_data[,-(which(colnames(birthweight_data) == "low"))], Y = birthweight_data[-1,c("ID", "low")],
+                          categorical_features = T, sample_cname,
+                          outcome_cname, pair_cname), "X and Y do not have the same number of rows")
   expect_error(as.MLinput(X = birthweight_data, Y = NULL, meta_colnames = NULL,
                           categorical_features = T, sample_cname,
                           outcome_cname, pair_cname), "Both Y and meta_colnames are NULL. Please specify either Y or meta_colnames")
@@ -85,13 +104,39 @@ test_that("Pairs are identified when approriate",{
                           meta_colnames = c("low", "ID", "Pair"),
                           sample_cname = sample_cname, outcome_cname = outcome_cname,
                           pair_cname = "Pair"),"there needs to be at least two observations for each unique Pair")
-})
+  birthweight_data$Pair <- 1000
+  expect_error(as.MLinput(X=birthweight_data, Y = NULL, categorical_features = TRUE,
+                          meta_colnames = c("low", "ID", "Pair"),
+                          sample_cname = sample_cname, outcome_cname = outcome_cname,
+                          pair_cname = "Pair"),"Pair column should contain at least 2 unique items")
+  birthweight_data$Pair[1] <- NA
+  expect_error(as.MLinput(X=birthweight_data, Y = NULL, categorical_features = TRUE,
+                          meta_colnames = c("low", "ID", "Pair"),
+                          sample_cname = sample_cname, outcome_cname = outcome_cname,
+                          pair_cname = "Pair"),"Missing pair information")
+  
+  
+  
+  })
 
 test_that("Missing rows are removed", {
   x_single_narows <- birthweight_data
   x_single_narows[c(4,6,8,10), 2:(ncol(x_single_narows)-1)] <- NA
   result_less_one <- as.MLinput(X = x_single_narows, Y = NULL, meta_colnames = c("low", "ID"), categorical_features = T, sample_cname, outcome_cname)
   expect_that(nrow(result_less_one$X), equals(nrow(result$X)-4))
+  birthweight_data$Pair <- rep(c(1,2,3), nrow(birthweight_data)/3)
+  birthweight_data[1,2:(ncol(x_single_narows)-1)] <- NA
+  paired_result <- as.MLinput(X=birthweight_data, Y = NULL, categorical_features = TRUE,
+                              meta_colnames = c("low", "ID", "Pair"),
+                              sample_cname = sample_cname, outcome_cname = outcome_cname,
+                              pair_cname = "Pair")
+  expect_equal(nrow(paired_result$X), nrow(result$X)-1)
+  birthweight_data$Pair[1:2] <- 50
+  paired_result2 <- as.MLinput(X=birthweight_data, Y = NULL, categorical_features = TRUE,
+                              meta_colnames = c("low", "ID", "Pair"),
+                              sample_cname = sample_cname, outcome_cname = outcome_cname,
+                              pair_cname = "Pair")
+  expect_equal(nrow(paired_result2$X), nrow(result$X)-2)
   
 })
 
