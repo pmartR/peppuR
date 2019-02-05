@@ -113,13 +113,13 @@ as.MLinput <- function(X, Y, meta_colnames = NULL, categorical_features = FALSE,
       sum(unlist(x))
     }))
     # if there are no categorical features...
-    if(all(categorical_sum) == 0){ #...and there should be, error out
+    if(all(categorical_sum == 0)){ #...and there should be, error out
       cat_cols <- NULL
-      if (categorical_features) stop("No categorical features detected. Change categorical_features to TRUE or change categorical columns to factors")
+      if (categorical_features) stop("No categorical features detected. Change categorical_features to FALSE or change categorical columns to factors")
       # if there are categorical features...
     } else if (any(categorical_sum >= 1)) {
-      cat_cols <- lapply(c_list, function(X) {
-        ind <- which(X)
+      cat_cols <- lapply(categorical_list, function(x) {
+        ind <- which(unlist(x))
         return(names(ind)) # return categorical feature locations 
       })
       df_with_cat <- names(which(categorical_sum >= 1)) # note which sources have categorical features
