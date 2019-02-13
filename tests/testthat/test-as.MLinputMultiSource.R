@@ -37,7 +37,7 @@ test_that("Y columns are extracted", {
   expect_equal(smashed_results, results)
   })
 
-test_that("All sources must contain an ID column", {
+test_that("Columns in sources", {
   x_multi$Cytokines <-  x_multi$Cytokines[,-which(colnames(x_multi$Cytokines) == sample_cname)]
   expect_error(as.MLinput(X=x_multi, Y = y_multi, categorical_features = FALSE,
                           sample_cname = sample_cname, outcome_cname = outcome_cname,
