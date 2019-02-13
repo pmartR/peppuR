@@ -78,15 +78,18 @@ as.MLinput <- function(X, Y, meta_colnames = NULL, categorical_features = FALSE,
             stop("All X must have sample names to ensure the same ordering in Y")
           } else {
             # extract the Y columns
-            raw_Y[[data_source]] <- x_data[, which(colnames(x_data) %in% unique(c(meta_colnames, sample_cname)))] %>%
-              dplyr::arrange_(sample_cname)# arrange the rows of raw_Y in order of sample
+            raw_Y[[data_source]] <- x_data[, which(colnames(x_data) %in% unique(c(meta_colnames, sample_cname))), drop = FALSE] #keep df structure
             # remove the Y columns from X aside from sample name
-            X[[data_source]] <- x_data[, -which(colnames(x_data) %in% unique(meta_colnames))]
+            if(any(colnames(x_data) %in% unique(meta_colnames))){
+              X[[data_source]] <- x_data[, -which(colnames(x_data) %in% unique(meta_colnames))]
+            }
           }
         }
+
         # make Y a data frame arranged by sample name
         Y <- raw_Y %>% 
-          purrr::reduce(left_join)
+          purrr::reduce(dplyr::left_join, by = sample_cname)
+        X <- lapply(X, function(d_source) return(d_source[which(d_source[,sample_cname] %in% Y[,sample_cname]), ]))
       }
     }
   }
@@ -256,8 +259,8 @@ MLinput_helper = function(x_df, y_df, sample_cname, outcome_cname, pair_cname) {
   if (nrow(x_df) != nrow(y_df)) stop("X and Y do not have the same number of rows")
   
   # check that sample_cname is present in x_df and y_df
-  if (!(sample_cname %in% names(x_df)) && !(sample_cname %in% names(y_df))) {
-    stop(paste(sample_cname, "is not a column of both X and Y", sep = ""))
+  if (!(sample_cname %in% names(x_df)) | !(sample_cname %in% names(y_df))) {
+    stop(paste(sample_cname, " is not a column of both X and Y", sep = ""))
   }
   
   # check for missing values in sample ids and outcomes (not allowed)
