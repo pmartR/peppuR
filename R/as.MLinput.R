@@ -149,8 +149,8 @@ as.MLinput <- function(X, Y, meta_colnames = NULL, categorical_features = FALSE,
     # key X by sample id and remove sample id from X
     X <- lapply(X, function(df){
       rownames(df) <- df[, sample_cname] #key
-      df <- df %>%
-        dplyr::select(-sample_cname) #remove sample id
+      # df <- df %>%
+      #   dplyr::select(-sample_cname) #remove sample id
       return(df)
     })
     # key Y by sample id
@@ -221,8 +221,8 @@ as.MLinput <- function(X, Y, meta_colnames = NULL, categorical_features = FALSE,
     rownames(Y) <- as.character(Y[, sample_cname])
     
     # remove sample id from X
-    X <- X %>%
-      dplyr::select(-sample_cname)
+    # X <- X %>%
+    #   dplyr::select(-sample_cname)
     
     # create output list
     output_list = list(X = X, Y = Y)
