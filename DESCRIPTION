@@ -15,4 +15,6 @@ RoxygenNote: 6.1.1
 Imports: 
     purrr,
     dplyr,
-    lme4
+    lme4,
+    caret,
+    klaR
