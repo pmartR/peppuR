@@ -17,4 +17,6 @@ Imports:
     dplyr,
     lme4,
     caret,
-    klaR
+    klaR,
+    magrittr,
+    data.table
