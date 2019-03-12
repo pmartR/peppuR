@@ -3,6 +3,8 @@
 #'This function creates an object that is ready to be used with peppuR package
 #'functions
 #'
+#' @importFrom magrittr "%>%"
+#'
 #'@param X data.frame or a list of data.frames all with n rows, f+1 columns, where one of the columns is a unique
 #'  sample identifier
 #'@param Y (optional) data.frame, one column designating sample id and the other
@@ -179,7 +181,9 @@ as.MLinput <- function(X, Y, meta_colnames = NULL, categorical_features = FALSE,
     
     # calculating data_info for each data frame in 'X' list. e.g. we need a named list of 'number_of_features' counts
     number_of_samples <- nrow(Y)
-    number_of_features <- as.data.frame(lapply(X, ncol))
+    number_of_features <- as.data.frame(lapply(X, function(d_source){
+      return(sum(!colnames(d_source) %in% sample_cname))
+    }))
     row.names(number_of_features) <- "n_features"
     
     # setting list attributes
