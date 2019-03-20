@@ -1,4 +1,4 @@
-rofi <- function(MLinput, Xdata, Ydata, partitions, source_alg_pairs, nn = 1, f_prob=0.1 , nu=1/100, maxIter=2*ncol(Xdata), conv_check=(ncol(Xdata)+1), epsilon = 0.01,verbose=FALSE){
+rofi <- function(MLinput, source_alg_pairs, nn = 1, f_prob=0.1 , nu=1/100, maxIter=2*sum(attr(MLinput, "data_info")$number_of_features), conv_check=(sum(attr(MLinput, "data_info")$number_of_features)+1), epsilon = 0.01,verbose=FALSE){
   #Xdata: n-by-p data.frame of feature vectors
   #Ydata: n-vector of 0/1 class labels
   #partitions: the partitions for test/training
@@ -11,7 +11,6 @@ rofi <- function(MLinput, Xdata, Ydata, partitions, source_alg_pairs, nn = 1, f_
   
   #--- Index features ----#
   sample_cname <- attr(MLinput, "cnames")$sample_cname
-  
   #p <- sum(attr(MLinput, "data_info")$number_of_features) this needs to be fixed use this bandaid for now
   if (length(source_alg_pairs) > 1){
     p <- sum(unlist(lapply(MLinput$X, function(d_source) sum(!colnames(d_source) %in% sample_cname))))
@@ -19,16 +18,28 @@ rofi <- function(MLinput, Xdata, Ydata, partitions, source_alg_pairs, nn = 1, f_
     p <- sum(!colnames(MLinput$X) %in% sample_cname)
   }
   
-  feature_map <- seq(from = 1, to = p, by = 1)
-  if (length(source_alg_pairs) > 1){
-    names(feature_map) <- unlist(lapply(MLinput$X, function(d_source) colnames(d_source)[which(!colnames(d_source) %in% sample_cname)]))
-  } else {
-    samp_ind <- which(names(MLinput$X) %in% sample_cname)
-    names(feature_map) <- names(MLinput$X)
+  feature_inds <- seq(from = 1, to = p, by = 1)
+  
+  # if (length(source_alg_pairs) > 1){
+  #   names(feature_inds) <- unlist(lapply(MLinput$X, function(d_source){
+  #     feats <- colnames(d_source)[which(!colnames(d_source) %in% sample_cname)] 
+  #   })
+  # } else {
+  #   samp_ind <- which(names(MLinput$X) %in% sample_cname)
+  #   names(feature_inds) <- names(MLinput$X)
+  # }
+  # Not my favorite way to index features, but works for now
+  feature_list <- vector("list", length(MLinput$X))
+  source_list <- vector("list", length(MLinput$X))
+  for (d_source in 1:length(feature_list)){
+    feature_list[[d_source]] <- colnames(MLinput$X[[d_source]])[which(!colnames(MLinput$X[[d_source]]) %in% sample_cname)]
+    source_list[[d_source]] <- rep(names(MLinput$X)[d_source], length(feature_list[[d_source]]))
   }
+  
   #p <- ncol(Xdata) #number of features
   sources <- names(source_alg_pairs) #Named data sources
   nsources <- length(sources)
+  feature_map <- data.frame(Feature = unlist(feature_list), Position = feature_inds, Source = unlist(source_list), stringsAsFactors = FALSE)
   
   # How often the AUC is recorded for convergence purposes
   benchmark_auc <- p
@@ -37,10 +48,10 @@ rofi <- function(MLinput, Xdata, Ydata, partitions, source_alg_pairs, nn = 1, f_
   results <- vector("list", nn)
   
   #Create list of column numbers for each source
-  source_cols <- source_alg_pairs
-  for(jk in 1:nsources){
-    source_cols[[jk]] <- grep(names(source_alg_pairs)[jk],colnames(Xdata))
-  }
+  # source_cols <- source_alg_pairs
+  # for(jk in 1:nsources){
+  #   source_cols[[jk]] <- grep(names(source_alg_pairs)[jk],colnames(Xdata))
+  # }
   
   for(i in 1:nn){
     aucchecks <- NULL
@@ -60,20 +71,22 @@ rofi <- function(MLinput, Xdata, Ydata, partitions, source_alg_pairs, nn = 1, f_
     fveci <- rbinom(p,1,f_prob)
     
     #2. Do cross validation using randomly chosen features
-    included_features <- feature_map[which(fveci==1)]
+    included_features <- feature_map$Feature[which(fveci==1)]
     subsetted_data <- MLinput
     subsetted_data$X <- lapply(subsetted_data$X, function(d_source){
-      d_source <- d_source[ ,which(colnames(d_source) %in% c(names(included_features), sample_cname)), drop=FALSE] # TODO:Features could be named the same across sources, account for this later
+      d_source <- d_source[ ,which(colnames(d_source) %in% c(included_features, sample_cname)), drop=FALSE] # TODO:Features could be named the same across sources, account for this later
       return(d_source)
     })
     
     #Xdata_i <- Xdata[,which(fveci==1)] #Only keep the randomly selected features (columns of Xdata)
-    source_alg_pairs <- c("rf", "rf", "rf", "rf", "rf")
-    names(source_alg_pairs) <- names(MLinput$X)
-    all_res <- fvecLearning(subsetted_data, source_alg_pairs)
+    #----- Learn on all sources and retrieve initial AUC------#
+    all_res <- fvecLearning(subsetted_data, source_alg_pairs) # TODO: Test edge cases of single/no features
+    all_res_probs <- naiveIntegration(all_res)
+    all_res_roc <- AUC::roc(predictions = all_res_probs$PredictedProbs.1, labels = as.factor(all_res_probs$Truth))
+    all_AUC <- AUC::auc(all_res_roc)
     
     iter <- 1
-    results[[i]]$BestAUC[iter] <- results[[i]]$AllAUC[iter] <- auci <- all_res$AUC
+    results[[i]]$BestAUC[iter] <- results[[i]]$AllAUC[iter] <- auci <- all_AUC
     results[[i]]$f_Vectors[iter,] <- fveci
     #results[[i]]$Changed[iter] <- 0
     
@@ -117,18 +130,31 @@ rofi <- function(MLinput, Xdata, Ydata, partitions, source_alg_pairs, nn = 1, f_
       #cat("\n")
       fvecip1[toflip] <- 1-fvecip1[toflip]
       flipped <- rep(FALSE,length(source_alg_pairs))
-      flipped_name <- colnames(Xdata)[toflip]
-      
-      for(j in 1:length(sources)){
-        if(length(grep(sources[j],flipped_name))>0){
-          flipped[j] <- TRUE
-        }
-      }
-      
+      flipped_name <- feature_map$Feature[toflip]
+      # Find which data source the flipped feature belongs to
+      flipped[which(feature_map$Source[toflip] %in% sources)] <- TRUE
+      # for(j in 1:length(sources)){
+      #   if(length(grep(sources[j],flipped_name))>0){
+      #     flipped[j] <- TRUE
+      #   }
+      # }
+      # 
       #Step c - compute AUC with perturbed feature vector
-      Xdata_i <- Xdata[,which(fvecip1==1)] #Only keep the randomly selected features (columns of Xdata)
-      all_res <- run_all(Xdf = Xdata_i, Ydf = Ydata, parts = partitions, sa_pairs = source_alg_pairs, previous_run = all_res$allOut, to_update=flipped)
-      aucip1 <- all_res$AUC
+      #Xdata_i <- Xdata[,which(fvecip1==1)] #Only keep the randomly selected features (columns of Xdata)
+      included_features <- feature_map$Feature[which(fvecip1==1)]
+      subsetted_data <- MLinput
+      subsetted_data$X <- lapply(subsetted_data$X, function(d_source){
+        d_source <- d_source[ ,which(colnames(d_source) %in% c(included_features, sample_cname)), drop=FALSE] # TODO:Features could be named the same across sources, account for this later
+        return(d_source)
+      })
+      # all_res <- run_all(Xdf = Xdata_i, Ydf = Ydata, parts = partitions, sa_pairs = source_alg_pairs, previous_run = all_res$allOut, to_update=flipped)
+      # aucip1 <- all_res$AUC
+      # 
+      all_res <- fvecLearning(subsetted_data, source_alg_pairs, previous_run = all_res, to_update = flipped) # TODO: Test edge cases of single/no features
+      all_res_probs <- naiveIntegration(all_res)
+      all_res_roc <- AUC::roc(predictions = all_res_probs$PredictedProbs.1, labels = as.factor(all_res_probs$Truth))
+      aucip1 <- AUC::auc(all_res_roc)
+      
       
       #Step d - compute acceptance prob and flip coin
       # i - acceptance prob
@@ -165,7 +191,7 @@ rofi <- function(MLinput, Xdata, Ydata, partitions, source_alg_pairs, nn = 1, f_
       }
       
       if(iter%%dynamic_check==0){
-        #cat("Checking Convergence")
+        cat("Checking Convergence")
         all_auc_diff <- diff(aucchecks)
         auc_diff <- abs(all_auc_diff[length(all_auc_diff)])
         if(auc_diff < epsilon){
@@ -208,11 +234,11 @@ fvecLearning <- function(MLinput, source_alg_pairs, previous_run = NULL, to_upda
   #--- Loop through sources and learn ----#
   for(i in 1:nsources){
     if(to_update[i]){
-      if(ncol(MLinput$X[[i]]) == 1){
+      if(ncol(MLinput$X[[i]]) <= 1){
         results[[i]] <- lapply(parts, function(x) data.frame(PredicetedProbs.0 = rep(1, length(x$test)),PredicetedProbs.1 = rep(1, length(x$test)),
                                                              PredictedLabel = rep(NA, length(x$test)), Truth = MLinput$Y[x$test, outcome_cname]))
       }else{
-        results[[i]] <- MLwrapper(data_object = MLinput, methods = source_alg_pairs[[i]], single_source = unname(s_names[i]))
+        results[[i]] <- attr(MLwrapper(data_object = MLinput, methods = source_alg_pairs[[i]], single_source = unname(s_names[i])), "ML_results")[[source_alg_pairs[[i]]]]
       }
     }
   }
