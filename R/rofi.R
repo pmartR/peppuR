@@ -1,3 +1,8 @@
+#' Repeated Optimized Feature Integration
+#' @param MLinput
+#' @param source_alg_pairs
+#' @param nn
+#' @export
 rofi <- function(MLinput, source_alg_pairs, nn = 1, f_prob=0.1 , nu=1/100, maxIter=2*sum(attr(MLinput, "data_info")$number_of_features), conv_check=(sum(attr(MLinput, "data_info")$number_of_features)+1), epsilon = 0.01,verbose=FALSE){
   #Xdata: n-by-p data.frame of feature vectors
   #Ydata: n-vector of 0/1 class labels
@@ -132,7 +137,12 @@ rofi <- function(MLinput, source_alg_pairs, nn = 1, f_prob=0.1 , nu=1/100, maxIt
       flipped <- rep(FALSE,length(source_alg_pairs))
       flipped_name <- feature_map$Feature[toflip]
       # Find which data source the flipped feature belongs to
-      flipped[which(feature_map$Source[toflip] %in% sources)] <- TRUE
+      #print(toflip)
+      #print(feature_map$Source[toflip])
+      #print(which(feature_map$Source[toflip] %in% sources))
+      #flipped[which(feature_map$Source[toflip] %in% sources)] <- TRUE
+      # for(j in 1:length(sources)){
+      flipped[which(sources %in% feature_map$Source[toflip])] <- TRUE
       # for(j in 1:length(sources)){
       #   if(length(grep(sources[j],flipped_name))>0){
       #     flipped[j] <- TRUE
@@ -184,7 +194,6 @@ rofi <- function(MLinput, source_alg_pairs, nn = 1, f_prob=0.1 , nu=1/100, maxIt
       } else {
         dynamic_check <- p
       }
-      
       #Record the AUC every "benchmark_auc" iterations
       if(iter%%benchmark_auc==0){
         aucchecks <- c(aucchecks,auci)
@@ -215,12 +224,12 @@ rofi <- function(MLinput, source_alg_pairs, nn = 1, f_prob=0.1 , nu=1/100, maxIt
   return(results)
 }
 
-fvecLearning <- function(MLinput, source_alg_pairs, previous_run = NULL, to_update = NULL, supervised = FALSE){
-  nsources <- attr(MLinput, "n_sources")
-  s_names <- names(MLinput$X)
-  sample_cname <- attr(MLinput, "cnames")$sample_cname
-  outcome_cname <- attr(MLinput, "cnames")$outcome_cname
-  parts <- attr(MLinput, "partition_info")
+fvecLearning <- function(featurizedMLinput, source_alg_pairs, previous_run = NULL, to_update = NULL, supervised = FALSE){
+  nsources <- attr(featurizedMLinput, "n_sources")
+  s_names <- names(featurizedMLinput$X)
+  sample_cname <- attr(featurizedMLinput, "cnames")$sample_cname
+  outcome_cname <- attr(featurizedMLinput, "cnames")$outcome_cname
+  parts <- attr(featurizedMLinput, "partition_info")
   
   #----- initialize if needed -----#
   if(is.null(previous_run)){
@@ -234,11 +243,11 @@ fvecLearning <- function(MLinput, source_alg_pairs, previous_run = NULL, to_upda
   #--- Loop through sources and learn ----#
   for(i in 1:nsources){
     if(to_update[i]){
-      if(ncol(MLinput$X[[i]]) <= 1){
+      if(all(colnames(featurizedMLinput$X[[unname(s_names[i])]]) %in% sample_cname)){
         results[[i]] <- lapply(parts, function(x) data.frame(PredicetedProbs.0 = rep(1, length(x$test)),PredicetedProbs.1 = rep(1, length(x$test)),
-                                                             PredictedLabel = rep(NA, length(x$test)), Truth = MLinput$Y[x$test, outcome_cname]))
+                                                             PredictedLabel = rep(NA, length(x$test)), Truth = featurizedMLinput$Y[x$test, outcome_cname]))
       }else{
-        results[[i]] <- attr(MLwrapper(data_object = MLinput, methods = source_alg_pairs[[i]], single_source = unname(s_names[i])), "ML_results")[[source_alg_pairs[[i]]]]
+        results[[i]] <- attr(MLwrapper(data_object = featurizedMLinput, methods = source_alg_pairs[[i]], single_source = unname(s_names[i])), "ML_results")[[source_alg_pairs[[i]]]]
       }
     }
   }
