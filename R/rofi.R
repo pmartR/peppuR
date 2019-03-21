@@ -196,7 +196,9 @@ rofi <- function(MLinput, source_alg_pairs, nn = 1, f_prob=0.1 , nu=1/100, maxIt
       }
       #Record the AUC every "benchmark_auc" iterations
       if(iter%%benchmark_auc==0){
+        print("Yes!")
         aucchecks <- c(aucchecks,auci)
+        print(aucchecks)
       }
       
       if(iter%%dynamic_check==0){
@@ -243,7 +245,7 @@ fvecLearning <- function(featurizedMLinput, source_alg_pairs, previous_run = NUL
   #--- Loop through sources and learn ----#
   for(i in 1:nsources){
     if(to_update[i]){
-      if(all(colnames(featurizedMLinput$X[[unname(s_names[i])]]) %in% sample_cname)){
+      if(all(colnames(featurizedMLinput$X[[i]]) %in% sample_cname) | (ncol(featurizedMLinput$X[[i]]) <=1 )){
         results[[i]] <- lapply(parts, function(x) data.frame(PredicetedProbs.0 = rep(1, length(x$test)),PredicetedProbs.1 = rep(1, length(x$test)),
                                                              PredictedLabel = rep(NA, length(x$test)), Truth = featurizedMLinput$Y[x$test, outcome_cname]))
       }else{
