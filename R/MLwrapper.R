@@ -44,7 +44,7 @@ MLwrapper = function(data_object, methods, scale_and_center = FALSE, single_sour
         # sample_cname column index
         samp_ind = which(names(x_data) %in% sample_cname)
         
-        ml_rez = lapply(methods, MLwrapper_helper, x_data, y_data, part_info, scale_and_center, outcome_cname, pair_cname, samp_ind)
+        ml_rez = lapply(methods, MLwrapper_helper, x_data, y_data, part_info, scale_and_center, outcome_cname, pair_cname, sample_cname)
         names(ml_rez) = methods
         
         attr(data_object, "ML_results") = ml_rez
@@ -70,9 +70,9 @@ MLwrapper = function(data_object, methods, scale_and_center = FALSE, single_sour
         pair_cname = attr(data_object, "cnames")$pair_cname
         
         # sample_cname column index
-        samp_ind = which(names(x_data[[1]]) %in% sample_cname)
+        #samp_ind = which(names(x_data[[1]]) %in% sample_cname)
         ml_rez_list = mapply(FUN = MLwrapper_helper, method = methods, X = x_data, MoreArgs = list(y_data, part_info, scale_and_center, 
-            outcome_cname, pair_cname, samp_ind))
+            outcome_cname, pair_cname, sample_cname))
         ml_rez_list = as.data.frame(ml_rez_list)
         ml_rez_list = lapply(ml_rez_list, as.data.frame, stringsAsFactors = FALSE)
         
@@ -104,9 +104,9 @@ MLwrapper = function(data_object, methods, scale_and_center = FALSE, single_sour
             pair_cname = attr(data_object, "cnames")$pair_cname
             
             # sample_cname column index
-            samp_ind = which(names(x_data) %in% sample_cname)
+            #samp_ind = which(names(x_data) %in% sample_cname)
             
-            ml_rez = lapply(methods, MLwrapper_helper, x_data, y_data, part_info, scale_and_center, outcome_cname, pair_cname, samp_ind)
+            ml_rez = lapply(methods, MLwrapper_helper, x_data, y_data, part_info, scale_and_center, outcome_cname, pair_cname, sample_cname)
             names(ml_rez) = methods
             
             # add attributes to data_object
@@ -123,10 +123,13 @@ MLwrapper = function(data_object, methods, scale_and_center = FALSE, single_sour
 
 
 
-MLwrapper_helper = function(method, X, data, partition_info, scale_and_center, outcome_cname, pair_cname, samp_ind) {
+MLwrapper_helper = function(method, X, data, partition_info, scale_and_center, outcome_cname, pair_cname, sample_cname) {
     # extract partition_info
     train_partitions = partition_info$train
     test_partitions = partition_info$test
+    if(sample_cname %in% colnames(X)){
+      X <- X[,-which(colnames(X) %in% sample_cname), drop=FALSE]
+    }
     
     # switch statement
     ml_method <- switch(method, svm = peppuR_svm, rf = peppuR_rf, nb = peppuR_nb, knn = peppuR_knn, lda = peppuR_lda)
@@ -139,8 +142,8 @@ MLwrapper_helper = function(method, X, data, partition_info, scale_and_center, o
             model <- "memoryless"
             
             # figure out the best way to scale and center the data
-            X_train <- scale(X[train_partition, -samp_ind], scale = TRUE, center = TRUE)
-            X_test <- (X[test_partition, -samp_ind] - attr(X_train, "scaled:center"))/attr(X_train, "scaled:scale")
+            X_train <- scale(X[train_partition, ], scale = TRUE, center = TRUE)
+            X_test <- (X[test_partition, ] - attr(X_train, "scaled:center"))/attr(X_train, "scaled:scale")
             start <- Sys.time()
             pred_prob <- attr(ml_method(X_train, X_test, train_class = as.factor(data[train_partition, outcome_cname]), prob = TRUE), 
                 "prob")
@@ -164,12 +167,12 @@ MLwrapper_helper = function(method, X, data, partition_info, scale_and_center, o
             test_partition = test$Test
             
             if (scale_and_center) {
-                X_train <- scale(X[train_partition, -samp_ind, drop = FALSE], scale = TRUE, center = TRUE)
-                X_test <- scale(X[test_partition, -samp_ind, drop = FALSE], center = attr(X_train, "scaled:center"), scale = attr(X_train, 
+                X_train <- scale(X[train_partition, , drop = FALSE], scale = TRUE, center = TRUE)
+                X_test <- scale(X[test_partition, , drop = FALSE], center = attr(X_train, "scaled:center"), scale = attr(X_train, 
                   "scaled:scale"))
             }
             start <- Sys.time()
-            model <- try(ml_method(X = X[train_partition, -samp_ind, drop = FALSE], data = data[train_partition, , drop = FALSE], 
+            model <- try(ml_method(X = X[train_partition, , drop = FALSE], data = data[train_partition, , drop = FALSE], 
                 outcome_cname = outcome_cname, pair_cname = pair_cname))
             train_time <- Sys.time() - start
             
@@ -181,18 +184,18 @@ MLwrapper_helper = function(method, X, data, partition_info, scale_and_center, o
             
             # lda uses a different syntax to return probabilities
             if (method == "lda") {
-                pred_prob <- predict(model, newdata = X[test_partition, -samp_ind, drop = FALSE])$posterior
+                pred_prob <- predict(model, newdata = X[test_partition, , drop = FALSE])$posterior
             } else if (method == "rf") {
-                pred_prob <- predict(model, data = X[test_partition, -samp_ind, drop = FALSE])$predictions
+                pred_prob <- predict(model, data = X[test_partition, , drop = FALSE])$predictions
                 #pred_prob <- data.frame(1 - as.numeric(pred_prob), pred_prob)
                 colnames(pred_prob) <- c("0", "1")
             } else if (method == "svm") {
-                pred_prob <- predict(model, newdata = X[test_partition, -samp_ind, drop = FALSE])
+                pred_prob <- predict(model, newdata = X[test_partition, , drop = FALSE])
                 pred_prob <- 1/(1 + exp(-pred_prob))
                 pred_prob <- data.frame(1 - pred_prob, pred_prob)
                 colnames(pred_prob) <- c("0", "1")
             } else {
-                pred_prob <- predict(model, newdata = X[test_partition, -samp_ind, drop = FALSE])
+                pred_prob <- predict(model, newdata = X[test_partition, , drop = FALSE])
             }
             
             pred_label <- as.numeric(apply(pred_prob, 1, function(x) names(x)[which.max(x)]))
