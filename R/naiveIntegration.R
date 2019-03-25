@@ -15,6 +15,9 @@
 #'@export
 #'
 naiveIntegration <- function(probabilities_by_source){
+  if (length(output_probabilities) == 1){
+    stop("One source detected. Nothing to integrate.")
+  }
   nobs <- lapply(probabilities_by_source, nrow)
   if (sum(unlist(nobs)) != unlist(nobs[1])*length(nobs)) { # check that all dfs have the same number of rows
     stop("The same number of observations is needed for all sources")
