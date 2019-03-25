@@ -19,4 +19,5 @@ Imports:
     caret,
     klaR,
     magrittr,
-    data.table
+    data.table,
+    ranger
