@@ -21,7 +21,7 @@ result = as.MLinput(X = birthweight_data, Y = NULL, meta_colnames = c("low", "ID
                     outcome_cname = outcome_cname, pair_cname = pair_cname)
 
 corObj <- correlationFilter(result)
-new_result <- applyCorrelationFilter(data_object = result, corFilt_object = corObj,threshold = 0.4)
+new_result_single <- applyCorrelationFilter(data_object = result, corFilt_object = corObj,threshold = 0.4)
 
 #------ Multi Source -------#
 data("multi_source")
@@ -40,6 +40,6 @@ multi_result <- suppressMessages(as.MLinput(X=x_multi, Y = y_multi, categorical_
 multiCorObj <- correlationFilter(multi_result)
 new_result <- applyCorrelationFilter(data_object = multi_result, corFilt_object = multiCorObj,threshold = rep(0.7, length(multi_result$X)))
 test_that("correlated feature is removed", {
-  expect_equal(attributes(new_result)$correlation_features_rm, "correlated_age")
+  expect_equal(attributes(new_result_single)$correlation_features_rm, "correlated_age")
 })
 

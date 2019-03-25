@@ -59,6 +59,6 @@ test_that("output tests for single source applyFeatureSelection", {
 test_that("output tests for multi source applyFeatureSelection", {
   expect_that(apply_multi_fs, is_a("list"))
   expect_that(length(apply_multi_fs), equals(2))
-  expect_equal(sum(unlist(lapply(multi_ufs_result, function(x) x$p_value > 0.2))), sum(attributes(multi_results)$data_info$number_of_features)-sum(unlist(lapply(apply_multi_fs$X, function(x) ncol(x)))) )
+  expect_equal(sum(unlist(lapply(multi_ufs_result, function(x) x$p_value > 0.2))), sum(attributes(multi_results)$data_info$number_of_features)-sum(unlist(lapply(apply_multi_fs$X, function(x) ncol(x)-1))) )
   expect_error(applyFeatureSelection(multi_results, multi_ufs_result, pval_threshold = 0.2))
   })
