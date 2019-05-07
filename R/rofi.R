@@ -183,7 +183,11 @@ rofi <- function(MLinput, source_alg_pairs, nn = 1, f_prob=0.1 , nu=1/100, maxIt
       # aucip1 <- all_res$AUC
       # 
       all_res <- fvecLearning(subsetted_data, source_alg_pairs, previous_run = all_res, to_update = flipped) # TODO: Test edge cases of single/no features
-      all_res_probs <- naiveIntegration(all_res)
+      if (n_sources == 1) {
+        all_res_probs <- all_res[[1]]
+      } else {
+        all_res_probs <- naiveIntegration(all_res)
+      }
       all_res_roc <- AUC::roc(predictions = all_res_probs$PredictedProbs.1, labels = as.factor(all_res_probs$Truth))
       aucip1 <- AUC::auc(all_res_roc)
       
