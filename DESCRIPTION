@@ -10,7 +10,8 @@ License: What license is it under?
 Encoding: UTF-8
 LazyData: true
 Suggests: 
-    testthat
+    testthat,
+    mice
 RoxygenNote: 6.1.1
 Imports: 
     purrr,
@@ -20,4 +21,7 @@ Imports:
     klaR,
     magrittr,
     data.table,
-    ranger
+    ranger,
+    missForest,
+    ModelMetrics,
+    AUC
