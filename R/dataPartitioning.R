@@ -16,7 +16,6 @@
 dataPartitioning = function(data_object, partition_style = "random", folds = 4, repeats = 100, holdout_perc = 0.25) {
     # extract y_data from data_object and cnames
     y_data = data_object$Y
-    
     group_identifier = attr(data_object, "cnames")$outcome_cname
     pair_identifier = attr(data_object, "cnames")$pair_cname
     
@@ -216,7 +215,6 @@ pairedCaseControlTestingTraining <- function(data, group_identifier, pair_identi
     
     tuning_set <- FALSE
     seed <- 42
-    
     #------- create a map to keep orignal indexing in tact -----#
     data$old_index <- 1:nrow(data)
     #------- remove the holdout set if there is one ---------#
