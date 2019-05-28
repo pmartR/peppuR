@@ -18,7 +18,7 @@ peppuR_rf <- function(X, data, outcome_cname, ...) {
     # y=as.factor(data$y)) If you try to use the formula 'y~.' you will likely get the error: 'Error: protect(): protection stack
     # overflow' so I switched to the 'dependent.variable.name='y'' interface as suggested here:
     # https://github.com/imbs-hl/ranger/issues/103
-    rf_fit <- ranger(data = data.frame(y = data[outcome_cname], X),
+    rf_fit <- ranger::ranger(data = data.frame(y = data[outcome_cname], X),
                      dependent.variable.name = outcome_cname,
                      importance = "impurity",
                      probability = TRUE)
