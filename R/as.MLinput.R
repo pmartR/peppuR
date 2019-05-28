@@ -91,7 +91,12 @@ as.MLinput <- function(X, Y, meta_colnames = NULL, categorical_features = FALSE,
         # make Y a data frame arranged by sample name
         Y <- raw_Y %>% 
           purrr::reduce(dplyr::left_join, by = sample_cname)
-        X <- lapply(X, function(d_source) return(d_source[which(d_source[,sample_cname] %in% Y[,sample_cname]), ]))
+        X <- lapply(X, function(d_source){
+          subX <- d_source[which(d_source[,sample_cname] %in% Y[,sample_cname]), ]
+          newX <- build_x_mat(subX)
+          return(newX)
+        } )
+        
       }
     }
   }
@@ -348,4 +353,38 @@ allna_row_helper = function(x, y, sample_cname, outcome_cname, pair_cname = NULL
     }
   }
   return(allna_names)
+}
+
+build_x_mat <- function(cov_df){
+  
+  if(is.null(ncol(cov_df))){
+    cov_df <- matrix(cov_df,ncol=1)
+  }
+  
+  #If all covariates are numeric, simply return the same matrix back
+  if(is.numeric(cov_df)){
+    return(data.matrix(cov_df))
+  }
+  
+  #If the covariates are a mix of numeric, factors and characters, return matrix of group identifiers
+  Xmatrix <- NULL
+  for(i in 1:ncol(cov_df)){
+    
+    if(is.numeric(cov_df[,i])){
+      #If column i is numeric, append it to X
+      Xmatrix <- cbind(Xmatrix,cov_df[,i])
+    }else{
+      coli_levels <- unique(cov_df[,i])
+      n_levels <- length(coli_levels)
+      if(n_levels!=length(cov_df[,i])){
+        Xcoli <- matrix(0,nrow(cov_df),n_levels)
+        
+        for(j in 1:n_levels){
+          Xcoli[cov_df[,i]==coli_levels[j],j] <- 1
+        }
+        Xmatrix <- cbind(Xmatrix,Xcoli)
+      }
+    }
+  }
+  return(Xmatrix)
 }
