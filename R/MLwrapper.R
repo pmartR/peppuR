@@ -125,6 +125,7 @@ MLwrapper = function(data_object, methods, scale_and_center = FALSE, single_sour
 
 MLwrapper_helper = function(method, X, data, partition_info, scale_and_center, outcome_cname, pair_cname, sample_cname) {
     # extract partition_info
+
     train_partitions = partition_info$train
     test_partitions = partition_info$test
     if(sample_cname %in% colnames(X)){
@@ -151,7 +152,8 @@ MLwrapper_helper = function(method, X, data, partition_info, scale_and_center, o
             
             pred_label <- as.numeric(apply(pred_prob, 1, function(x) names(x)[which.max(x)]))
             truth <- data[test_partition, outcome_cname, drop = FALSE]
-            res <- data.frame(PredictedProbs = pred_prob, PredictedLabel = pred_label, Truth = truth)
+            ID <- data[test_partition, sample_cname, drop = FALSE]
+            res <- data.frame(PredictedProbs = pred_prob, PredictedLabel = pred_label, Truth = truth, SampleID = ID)
             attributes(res)$train_time <- train_time
             return(res)
             
@@ -200,7 +202,8 @@ MLwrapper_helper = function(method, X, data, partition_info, scale_and_center, o
             
             pred_label <- as.numeric(apply(pred_prob, 1, function(x) names(x)[which.max(x)]))
             truth <- data[test_partition, outcome_cname, drop = FALSE]
-            res <- data.frame(PredictedProbs = pred_prob, PredictedLabel = pred_label, Truth = truth)
+            ID <- data[test_partition, sample_cname, drop = FALSE]
+            res <- data.frame(PredictedProbs = pred_prob, PredictedLabel = pred_label, Truth = truth, SampleID = ID)
             attributes(res)$train_time <- train_time
             return(res)
             
@@ -217,7 +220,7 @@ MLwrapper_helper = function(method, X, data, partition_info, scale_and_center, o
         result = mapply(function(item, name) {
             rez = cbind(item, rep(name, nrow(item)))
             names(rez)[4] = "Truth"
-            names(rez)[5] = "Partition_info"
+            names(rez)[6] = "Partition_info"
             
             return(rez)
             
