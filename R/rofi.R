@@ -3,7 +3,8 @@
 #' @param source_alg_pairs
 #' @param nn
 #' @export
-rofi <- function(MLinput, source_alg_pairs, nn = 1, f_prob=0.1 , nu=1/100, maxIter=2*sum(attr(MLinput, "data_info")$number_of_features), conv_check=(sum(attr(MLinput, "data_info")$number_of_features)+1), epsilon = 0.01,verbose=FALSE){
+rofi <- function(MLinput, source_alg_pairs, nn = 1, f_prob=0.1 , nu=1/100, maxIter=2*sum(attr(MLinput, "data_info")$number_of_features), 
+                 conv_check=(sum(attr(MLinput, "data_info")$number_of_features)+1), epsilon = 0.01,verbose=FALSE, after_conv_checks = 100){
   #Xdata: n-by-p data.frame of feature vectors
   #Ydata: n-vector of 0/1 class labels
   #partitions: the partitions for test/training
@@ -56,17 +57,11 @@ rofi <- function(MLinput, source_alg_pairs, nn = 1, f_prob=0.1 , nu=1/100, maxIt
   feature_map <- data.frame(Feature = unlist(feature_list), Position = feature_inds, Source = unlist(source_list), stringsAsFactors = FALSE)
   
   # How often the AUC is recorded for convergence purposes
-  benchmark_auc <- p
+  benchmark_auc <- after_conv_checks
   
   # Results list
   results <- vector("list", nn)
-  
-  #Create list of column numbers for each source
-  # source_cols <- source_alg_pairs
-  # for(jk in 1:nsources){
-  #   source_cols[[jk]] <- grep(names(source_alg_pairs)[jk],colnames(Xdata))
-  # }
-  
+
   for(i in 1:nn){
     aucchecks <- NULL
     
@@ -218,7 +213,7 @@ rofi <- function(MLinput, source_alg_pairs, nn = 1, f_prob=0.1 , nu=1/100, maxIt
       if(iter <= conv_check) {
         dynamic_check <- conv_check
       } else {
-        dynamic_check <- p
+        dynamic_check <- after_conv_checks
       }
       #Record the AUC every "benchmark_auc" iterations
       if(iter%%benchmark_auc==0){
@@ -228,7 +223,6 @@ rofi <- function(MLinput, source_alg_pairs, nn = 1, f_prob=0.1 , nu=1/100, maxIt
       }
       
       if(iter%%dynamic_check==0){
-        cat("Checking Convergence")
         all_auc_diff <- diff(aucchecks)
         auc_diff <- abs(all_auc_diff[length(all_auc_diff)])
         if(auc_diff < epsilon){
@@ -249,7 +243,24 @@ rofi <- function(MLinput, source_alg_pairs, nn = 1, f_prob=0.1 , nu=1/100, maxIt
     
   }
   
-  return(results)
+  #---- Get Feature Importance and Info -----#
+  final_fvecs <- lapply(results, function(nn){
+    nn$f_Vectors[nrow(nn$f_Vectors), ]
+  })
+  
+  importance <- data.frame(t(do.call("rbind", final_fvecs)))
+  importance_metric <- rowSums(importance)/ncol(importance)
+  importance <- cbind(importance_metric, importance)
+  importance <- cbind(feature_map, importance) %>% dplyr::select(-Position)
+  
+  #---- Get Performance Metrics and Info -----#
+  aucs <- vector("list", nn)
+  for(i in 1:nn){
+    aucs[[i]] <- data.frame(Iteration = i, do.call("cbind", results[[i]]))
+  }
+  aucs <- do.call("rbind", aucs)
+  colnames(aucs)[-c(1:3)] <- feature_map$Feature 
+  return(list(importance, aucs))
 }
 
 fvecLearning <- function(featurizedMLinput, source_alg_pairs, previous_run = NULL, to_update = NULL, supervised = FALSE){
