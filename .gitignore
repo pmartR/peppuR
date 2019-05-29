@@ -2,7 +2,6 @@ inst/doc
 # History files
 .Rhistory
 .Rapp.history
-
 # Session Data files
 .RData
 # Example code in package build process
@@ -31,3 +30,5 @@ rsconnect/
 .DS*
 # covr files
 .travis.yml
+peppuR.Rproj
+.Rbuildignore

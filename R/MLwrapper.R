@@ -196,7 +196,9 @@ MLwrapper_helper = function(method, X, data, partition_info, scale_and_center, o
                 pred_prob <- 1/(1 + exp(-pred_prob))
                 pred_prob <- data.frame(1 - pred_prob, pred_prob)
                 colnames(pred_prob) <- c("0", "1")
-            } else {
+            } else if(method=="nb"){
+                pred_prob <- predict(model, newdata = X[test_partition, , drop = FALSE],type = "prob")
+            }else{
                 pred_prob <- predict(model, newdata = X[test_partition, , drop = FALSE])
             }
             
