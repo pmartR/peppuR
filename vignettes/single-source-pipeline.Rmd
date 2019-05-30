@@ -1,0 +1,126 @@
+---
+title: "Getting Started"
+author: "Sarah M. Reehl and Iobani Godinez"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Getting Started}
+  %\VignetteEngine{knitr::rmarkdown}
+  \usepackage[utf8]{inputenc}
+
+---
+
+```{r, echo = FALSE, message = FALSE}
+knitr::opts_chunk$set(collapse = T, comment = "#>")
+options(tibble.print_min = 4L, tibble.print_max = 4L)
+library(peppuR)
+library(ggplot2)
+set.seed(1014)
+```
+
+Predictive analysis of biological data genearlly requires a processing pipline that takes raw data through ingestion and organization, preprocessing, and learning phases. One can imagine that these phases are highly subject to the analyst or analysts handling the data. Packages like peppuR provide tools to create well documented pipelines so that analyses are easily understood and completely reproducible. We will introduce three simple peppuR pipelines in the following sections for biological use cases of:
+
+1. a single data source 
+2. a single data source subject to a paired case-control design
+3. multiple data sources
+
+## Data
+
+We will utilize the `MASS::birthwt` dataset for a lightweight example. The data consit of 189 rows corresponding to 189 individuals. Each of the 10 columns include information about a subject's maternal factors and birth conditions. The first column in the dataset, `low`, is a binary indicator of a birth weight less than 2.5 kg and is the outcome we would like to predict using the remaining 9 columns. For more information about the dataset, use `?MASS::birthwt`. 
+
+```{r}
+library(MASS)
+dim(birthwt)
+head(birthwt)
+```
+
+## Use Cases
+#### The Single Data Source Case
+When we talk about a single data source, we mean the data naturally divide into a single outcome and a block of covariates related to the outcome.  
+
+##### Ingestion and Organization
+![](single_source.001.jpeg)
+
+The ingestion step of peppuR utilizes an `as.MLinput()` input function to organize the data into outcome and covariates. A few important notes about putting data into peppuR:
+
+* The must be a named sample identifier column. If there are multiple sources, this column must have the same name across sources
+* Categorical features must appear as factors in the data
+* All non-covariates must either be separated into a data.frame and passed as `Y` or specified by name in `meta-colnames`.
+
+
+```{r}
+# Add subject names to the data
+birthweight_data <- birthwt
+birthweight_data$ID <- paste("ID",1:nrow(birthweight_data), sep = "_")
+birthweight_data$low <- as.factor(birthweight_data$low)
+
+
+# Make categorical columns factors
+birthweight_data[, colnames(birthweight_data) %in% c("race", "smoke", "ht", "ui")] <- lapply(birthweight_data[, colnames(birthweight_data) %in% c("race", "smoke", "ht", "ui")], function(x) as.factor(x))
+
+# Create an organized data object
+single_source_peppuRobj <- as.MLinput(X = birthweight_data, Y = NULL, 
+                                      meta_colnames = c("ID", "low"),
+                                      categorical_features = TRUE,
+                                      sample_cname = "ID", outcome_cname = "low")
+```
+
+The result of `as.MLinput()` is both a list and an `MLinput` object with special properties, like the following attributes:
+
+```{r}
+attributes(single_source_peppuRobj)
+```
+
+Notice that we're slightly luck here in that there are no missing data. We'll look later into the functionality of peppuR that will handle missing data for us.
+
+#### Machine Learning
+
+Without the need for preprcoessing, the next logical step in a machine learning pipeline is to create cross-validation folds. Again utilizing the `caret` package, the `dataPationing` function will add an attribute to the data object that separates the data into cross validation folds. In the case where there are not enough data to have a true test set, we allow the option for repeated cross-validation with the `repeats` argument.
+
+```{r}
+single_source_peppuRobj <- dataPartitioning(single_source_peppuRobj, folds = 5, repeats = 10)
+```
+
+After the data are partioned, a single machine learning algorithm can be trained and evaluated on the partitions with the `MLWrapper`. Below we show how to train a Random Forest using the 5-fold cross validation we created in the previous step, repeated 10 times.
+
+
+```{r}
+rf_results <- MLwrapper(data_object = single_source_peppuRobj, methods = "rf")
+#----Take a look at the results ------#
+output_probabilities <- attr(rf_results, "ML_results")
+```
+
+The output of the MLwrapper adds attributes to the data object. The most important of the attributes is the `ML_results` which contains a sample-wise class probability for each observation in our validation fold. 
+
+```{r, echo=FALSE}
+
+knitr::kable(data.frame(output_probabilities)[1:10,], row.names = FALSE)
+```
+
+We can look at reciever operating characteristics (ROC) with a ROC curve:
+```{r}
+library(ggplot2)
+temp <- AUC::roc(output_probabilities$rf$PredictedProbs.1, labels = output_probabilities$rf$Truth)
+
+ggplot(data.frame(fpr = temp$fpr, tpr = temp$tpr), aes(x = fpr, y = tpr))+
+  geom_line(color = "blue")+
+  theme_bw()+
+  ggtitle("Random Forest ROC")
+
+```
+
+#### Ensemble Feature Selection
+
+```{r}
+#-----ROFI------#
+source_alg_pairs <- "rf"
+names(source_alg_pairs) <- "DS_1"
+rofi_results <- rofi(single_source_peppuRobj, source_alg_pairs, nn = 1, f_prob=0.4 ,
+                     nu=1/100, conv_check = 30,maxIter=50,epsilon = 0.01,verbose=FALSE)
+```
+```{r}
+rown <- length(rofi_results[[1]]$AllAUC)
+fveci <- rofi_results[[1]]$f_Vectors[rown,]
+final_fvec <- 0 +fveci/1
+qplot(1:length(final_fvec),final_fvec)+xlab("Variable Index")+ylab("% Times Chosen")
+```
+
