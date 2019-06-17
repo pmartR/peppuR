@@ -11,7 +11,6 @@ Encoding: UTF-8
 LazyData: true
 Suggests: 
     testthat,
-    mice,
     knitr,
     rmarkdown
 RoxygenNote: 6.1.1
@@ -26,5 +25,6 @@ Imports:
     ranger,
     missForest,
     ModelMetrics,
-    AUC
+    AUC,
+    mice
 VignetteBuilder: knitr
