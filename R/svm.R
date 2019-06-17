@@ -10,6 +10,7 @@ require(kernlab)
 #' @param ... - additional arguements passed to BGLR(...)
 #' 
 #' @return the object created by BGLR
+#' @export
 
 peppuR_svm <- function(X, data, outcome_cname, ...) {
     # print(...)
@@ -19,7 +20,7 @@ peppuR_svm <- function(X, data, outcome_cname, ...) {
         data[outcome_cname] <- 2 * as.numeric(data[[outcome_cname]]) - 1
     }
     
-    return(ksvm(x = data.matrix(X), y = data[outcome_cname], prob.model = TRUE, verbose = FALSE, ...))
+    return(kernlab::ksvm(x = data.matrix(X), y = data[outcome_cname], prob.model = TRUE, verbose = FALSE, ...))
 }
 
 
