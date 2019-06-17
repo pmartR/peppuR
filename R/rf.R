@@ -9,6 +9,7 @@ require(ranger)
 #' @param ... - additional arguements passed to BGLR(...)
 #' 
 #' @return the object created by BGLR
+#' @export
 
 peppuR_rf <- function(X, data, outcome_cname, ...) {
     
