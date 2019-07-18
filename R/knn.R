@@ -7,6 +7,7 @@ require(caret)
 #'        pair - vector of pair identifiers
 #'        time - n vector of time point identifiers
 #' @param ... - additional arguements passed to BGLR(...)
+#' @rdname peppuR_knn
 #' 
 #' @return the object created by BGLR
 

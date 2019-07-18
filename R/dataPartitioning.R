@@ -25,8 +25,8 @@ dataPartitioning = function(data_object, partition_style = "random", folds = 4, 
     if (!inherits(y_data, "data.frame")) 
         stop("'y_data' must be of class 'data.frame'")
     
-    if (partition_style == "random" & !is.null(pair_identifier)) 
-        stop("'pair_identifier' is only used with 'paired' partition_style")
+    if (partition_style == "paired" & is.null(pair_identifier)) 
+        stop("'pair_identifier' is required for a 'paired' partition_style")
     
     repeats_new = repeats * 1.5
     repeats_extra = repeats_new - repeats

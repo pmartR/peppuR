@@ -8,6 +8,7 @@ require(MASS)
 #'        time - n vector of time point identifiers
 #' @param ... - additional arguements passed to BGLR(...)
 #' 
+#' @rdname peppuR_lda
 #' @return the object created by BGLR
 
 peppuR_lda <- function(X, data, outcome_cname, ...) {

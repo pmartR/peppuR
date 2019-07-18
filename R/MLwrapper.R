@@ -1,3 +1,7 @@
+require(kernlab)
+require(naivebayes)
+require(ranger)
+require(caret)
 #' Applies ML algorithms to partitioned data
 #' 
 #' This function applies ML algorithms to 'MLinput' object 
@@ -95,9 +99,9 @@ MLwrapper = function(data_object, methods, scale_and_center = FALSE, single_sour
         stop(paste(single_source, " is not one of the data source names of 'data_object'", sep = ""))
       
       # select the correct data source
-      x_data = x_data[which(names(x_data) %in% single_source)]
-      names(x_data) = NULL
-      x_data = as.data.frame(x_data)
+      x_data = x_data[which(names(x_data) %in% single_source)][[1]]
+      #names(x_data) = NULL
+      #x_data = as.data.frame(x_data)
       
       # extract cnames
       sample_cname = attr(data_object, "cnames")$sample_cname
