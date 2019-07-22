@@ -4,7 +4,8 @@
 \alias{plot.mlSelect}
 \title{Plots an object of class mlSelect}
 \usage{
-plot.mlSelect(results_object, roc_curves = TRUE, ...)
+plot.mlSelect(results_object, roc_curves = TRUE, time_chart = FALSE,
+  ...)
 }
 \arguments{
 \item{uniFiltRes}{an object of the class 'uniFiltRes', usually created by \code{\link{univariate_feature_selection}}.}
@@ -16,7 +17,4 @@ plots ggplot2 object
 }
 \description{
 For plotting an S3 object of type 'uniFiltRes'
-}
-\examples{
-
 }
