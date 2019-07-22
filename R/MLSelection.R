@@ -8,9 +8,6 @@
 #' @param repeats integer of number of iterations to repeat cross validation
 #' @param algorithms either 'all', or one of 'rf', 'svm', 'nb', 'knn'. May also include a vector combination of the latter (e.g. c('rf','svm'))
 #' 
-#' @details 
-#' 
-#' @examples 
 #' @export
 #' 
 MLSelection <- function(data_object, partition_style = 'random', folds = 3, repeats = 10, algorithms = 'all', data_sources = 'all', single_source = NULL) {
@@ -32,11 +29,13 @@ MLSelection <- function(data_object, partition_style = 'random', folds = 3, repe
     for(sources in 1:attr(data_object,"n_sources")){
       temp_results <- MLwrapper(data_object = data_object, methods = c("knn", "rf", "nb", "svm"), single_source = names(data_object$X)[sources])
       output_probabilities <- attr(temp_results, "ML_results")
-      timing <- attr(temp_results, "")
       #browser()
       results[[sources]] <- lapply(output_probabilities, function(x){
         AUCs <- try(AUC::roc(predictions = x$PredictedProbs.1, labels = factor(x$Truth)),silent = TRUE )
+        attributes(AUCs)$Time <- try(mean(x$Time))
+        return(AUCs)
     })
+      #------------ This wont work with the current data structure. Catch this later ----------#
       if (any(class(results[[sources]]) == "try-error")){
         results[[sources]] <- NA
       }
