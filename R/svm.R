@@ -8,9 +8,7 @@ require(kernlab)
 #'        time - n vector of time point identifiers
 #' @param oneclass - if pair information is provided, should a one-class SVM be built?
 #' @param ... - additional arguements passed to BGLR(...)
-#' @rdname peppuR_svm
 #' @return the object created by BGLR
-#' @export
 
 peppuR_svm <- function(X, data, outcome_cname, ...) {
     # print(...)

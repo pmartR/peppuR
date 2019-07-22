@@ -8,7 +8,6 @@ require(naivebayes)
 #'        pair - vector of pair identifiers
 #'        time - n vector of time point identifiers
 #' @param ... - additional arguements passed to BGLR(...)
-#' @rdname peppuR_nb
 #' @return the object created by BGLR
 
 peppuR_nb <- function(X, data, pair_cname, outcome_cname, sample_cname, ...) {

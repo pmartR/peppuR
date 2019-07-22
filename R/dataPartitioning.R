@@ -7,10 +7,6 @@
 #' @param folds integer of k for k-fold cross validation
 #' @param repeats integer of number of iterations to repeat cross validation
 #' @param holdout_perc numeric between 0 and 1 indicating the percentage of data to withold for the holdout validation set
-#' 
-#' @details 
-#' 
-#' @examples 
 #' @export
 
 dataPartitioning = function(data_object, partition_style = "random", folds = 4, repeats = 100, holdout_perc = 0.25) {

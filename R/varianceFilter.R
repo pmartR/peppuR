@@ -1,12 +1,10 @@
 #' Applies near Zero Variance function to data or data partitions
-#' 
+#'
 #' This function Applies near Zero Variance function to data or data partitions
-#' 
-#' @param data_object argument is the output produced by as.MLinput, which contains a single x data frame or a list of x data frames, a y data frames and attributes
-#' 
-#' @details 
-#' 
-#' @examples 
+#'
+#' @param data_object argument is the output produced by as.MLinput, which
+#'   contains a single x data frame or a list of x data frames, a y data frames
+#'   and attributes
 #' @export
 varianceFilter = function(data_object, ...) {
     .varianceFilter(data_object, ...)

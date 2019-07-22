@@ -5,7 +5,6 @@
 #' @param uniFiltRes an object of the class 'uniFiltRes', usually created by \code{\link{univariate_feature_selection}}.
 #' @param pval_threshold is the cutoff value for pvalues, can be a single value or a vector of distinct pvalues
 #' 
-#' @details 
 #' @return plots ggplot2 object
 #'
 #' @examples

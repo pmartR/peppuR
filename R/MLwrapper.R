@@ -3,16 +3,18 @@ require(naivebayes)
 require(ranger)
 require(caret)
 #' Applies ML algorithms to partitioned data
-#' 
-#' This function applies ML algorithms to 'MLinput' object 
-#' 
-#' @param data_object object of class 'MLinput' a list of two data frames containing train and test rows to subset in x_data and y_data
-#' @param methods a vector of strings specifying which ML algorithm you want to implement? options: 'bglr', 'clogit'. The length of this vector must be equal to the number of data sources in data_object
-#' @param single_source is a character string identifying which data source (when there is more than 1 data source in data_object) to apply ML to. Defaults to NULL
 #'
-#' @details 
-#' 
-#' @examples 
+#' This function applies ML algorithms to 'MLinput' object
+#'
+#' @param data_object object of class 'MLinput' a list of two data frames
+#'   containing train and test rows to subset in x_data and y_data
+#' @param methods a vector of strings specifying which ML algorithm you want to
+#'   implement? options: 'bglr', 'clogit'. The length of this vector must be
+#'   equal to the number of data sources in data_object
+#' @param single_source is a character string identifying which data source
+#'   (when there is more than 1 data source in data_object) to apply ML to.
+#'   Defaults to NULL
+#'
 #' @export
 MLwrapper = function(data_object, methods, scale_and_center = FALSE, single_source = NULL) {
   # match 'method' argument with available options
@@ -214,10 +216,11 @@ MLwrapper_helper = function(method, X, data, partition_info, scale_and_center, o
       }
     }
     
+    #
     pred_label <- as.numeric(apply(pred_prob, 1, function(x) names(x)[which.max(x)]))
     truth <- data[test_partition, outcome_cname, drop = FALSE]
     ID <- data[test_partition, sample_cname, drop = FALSE]
-    res <- data.frame(PredictedProbs = pred_prob, PredictedLabel = pred_label, Truth = truth, SampleID = ID)
+    res <- data.frame(PredictedProbs = pred_prob, PredictedLabel = pred_label, Truth = truth, SampleID = ID, Time = rep(train_time, length(pred_label)))
     attributes(res)$train_time <- train_time
     return(res)
     
@@ -234,7 +237,8 @@ MLwrapper_helper = function(method, X, data, partition_info, scale_and_center, o
   result = mapply(function(item, name) {
     rez = cbind(item, rep(name, nrow(item)))
     names(rez)[4] = "Truth"
-    names(rez)[6] = "Partition_info"
+    names(rez)[6] = "Time"
+    names(rez)[7] = "Partition_info"
     
     return(rez)
     
@@ -243,7 +247,12 @@ MLwrapper_helper = function(method, X, data, partition_info, scale_and_center, o
   result = as.data.frame(result)
   result = lapply(result, as.data.frame, stringsAsFactors = FALSE)
   result = do.call(rbind, result)
-  
+  # avg_time <- result %>%
+  #   dplyr::group_by(Partition_info) %>%
+  #   dplyr::summarise(Times = dplyr::first(Time)) 
+  # result <- result %>%
+  #   dplyr::select(Time)
+
   
   return(result)
 }
