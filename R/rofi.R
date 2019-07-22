@@ -1,19 +1,26 @@
 #' Repeated Optimized Feature Integration
-#' @param MLinput
-#' @param source_alg_pairs
-#' @param nn
+#' @param MLinput an as.MLinput object which contains a single X data frame or a
+#'   list of X data frames, a Y data frame and attributes
+#' @param source_alg_pairs a named vector of algorithms (one of "knn", "nb",
+#'   "svm", or "rf") with names as the corresponding data source
+#' @param nn integer. The number of times to repeat the optimization in its
+#'   entirety
+#' @param f_prob numeric greater than 0 and leq 1. The proportion of the full
+#'   feature set to initialize the optimization routine
+#' @param nu numeric greater than 0 and leq 1. The scale value for feature
+#'   acceptance criteria of a difference in AUC values
+#' @param max_iter int. Maximum number of iterations to allow in nn iterations
+#' @param conv_check int. Number of iterations at which to perform a
+#'   convergence check. Typically set to the total number of features
+#' @param epsilon numeric greater than 0 and leq 1. AUC convergence threshold,
+#'   typically small (< 0.1).
+#' @param after_conv_checks int. After the initial convergence check, the
+#'   Interval of iterations at which to perform a convergence check
 #' @export
-rofi <- function(MLinput, source_alg_pairs, nn = 1, f_prob=0.1 , nu=1/100, maxIter=2*sum(attr(MLinput, "data_info")$number_of_features), 
-                 conv_check=(sum(attr(MLinput, "data_info")$number_of_features)+1), epsilon = 0.01,verbose=FALSE, after_conv_checks = 100){
-  #Xdata: n-by-p data.frame of feature vectors
-  #Ydata: n-vector of 0/1 class labels
-  #partitions: the partitions for test/training
-  #source_alg_pairs: list of sources and the methods to use with each
-  #nn: number of times to do outer loop
-  #nu: scale value in the difference in AUC values
-  #maxIter: maximum number of iterations allowed within one "nn" iteration
-  #conv_check: how often should we check for convergence in step 3?
-  #epsilon: AUC convergence threshold
+rofi <- function(MLinput, source_alg_pairs, nn = 1, f_prob=0.1 , nu=1/100,
+                 max_iter=2*sum(attr(MLinput, "data_info")$number_of_features), 
+                 conv_check=(sum(attr(MLinput, "data_info")$number_of_features)+1),
+                 epsilon = 0.01, after_conv_checks = 100){
   
   #--- Index features ----#
   sample_cname <- attr(MLinput, "cnames")$sample_cname
@@ -70,10 +77,10 @@ rofi <- function(MLinput, source_alg_pairs, nn = 1, f_prob=0.1 , nu=1/100, maxIt
     #Create elements in results list
     results[[i]] <- vector("list",4)
     names(results[[i]]) <- c("AllAUC","BestAUC","f_Vectors","Changed")
-    results[[i]]$BestAUC <- rep(NA,maxIter)
-    results[[i]]$AllAUC <- rep(NA,maxIter)
-    results[[i]]$f_Vectors <- matrix(NA,maxIter,p)
-    results[[i]]$Changed <- rep(NA,maxIter)
+    results[[i]]$BestAUC <- rep(NA,max_iter)
+    results[[i]]$AllAUC <- rep(NA,max_iter)
+    results[[i]]$f_Vectors <- matrix(NA,max_iter,p)
+    results[[i]]$Changed <- rep(NA,max_iter)
     
     #1. Select a ranodm number of features to include in model  
     #Select random 100*f_prob% of the features
@@ -113,20 +120,20 @@ rofi <- function(MLinput, source_alg_pairs, nn = 1, f_prob=0.1 , nu=1/100, maxIt
     
     #Create the vector that defines the order in which each features is turned on/off
     #don't really love creating a vector of length maxIter but it's easy
-    if((maxIter-1)<=p){
-      flip_order <- sample(p,maxIter-1,replace = FALSE)
+    if((max_iter-1)<=p){
+      flip_order <- sample(p,max_iter-1,replace = FALSE)
     }else{
-      flip_order <- rep(NA,maxIter-1)
-      for(lazy in 1:round((maxIter-1)/p,0)){
+      flip_order <- rep(NA,max_iter-1)
+      for(lazy in 1:round((max_iter-1)/p,0)){
         flip_order[(1:p)+p*(lazy-1)] <- sample(p)
       }
-      flip_order[-c(1:(p*lazy))] <- sample(p,(maxIter-1)%%p,replace=FALSE)
+      flip_order[-c(1:(p*lazy))] <- sample(p,(max_iter-1)%%p,replace=FALSE)
       
     }
     flip_order <- c(0,flip_order)
     results[[i]]$Changed <- flip_order
     
-    while(iter<maxIter){
+    while(iter<max_iter){
       #cat("You're in the loop!\n")
       iter <- iter+1
       
