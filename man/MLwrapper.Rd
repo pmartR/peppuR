@@ -8,15 +8,17 @@ MLwrapper(data_object, methods, scale_and_center = FALSE,
   single_source = NULL)
 }
 \arguments{
-\item{data_object}{object of class 'MLinput' a list of two data frames containing train and test rows to subset in x_data and y_data}
+\item{data_object}{object of class 'MLinput' a list of two data frames
+containing train and test rows to subset in x_data and y_data}
 
-\item{methods}{a vector of strings specifying which ML algorithm you want to implement? options: 'bglr', 'clogit'. The length of this vector must be equal to the number of data sources in data_object}
+\item{methods}{a vector of strings specifying which ML algorithm you want to
+implement? options: 'bglr', 'clogit'. The length of this vector must be
+equal to the number of data sources in data_object}
 
-\item{single_source}{is a character string identifying which data source (when there is more than 1 data source in data_object) to apply ML to. Defaults to NULL}
+\item{single_source}{is a character string identifying which data source
+(when there is more than 1 data source in data_object) to apply ML to.
+Defaults to NULL}
 }
 \description{
 This function applies ML algorithms to 'MLinput' object
-}
-\details{
-
 }

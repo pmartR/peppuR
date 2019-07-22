@@ -23,6 +23,3 @@ MLSelection(data_object, partition_style = "random", folds = 3,
 This function returns performance and timing metrics for each source/algorithm combination
 importFrom magrittr "%>%"
 }
-\details{
-
-}

@@ -22,6 +22,3 @@ dataPartitioning(data_object, partition_style = "random", folds = 4,
 This function returns information on how to partition (randomly or paired) y_data
 importFrom magrittr "%>%"
 }
-\details{
-
-}
