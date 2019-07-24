@@ -173,8 +173,8 @@ MLwrapper_helper = function(method, X, data, partition_info, scale_and_center, o
       # attributes(res)$train_time <- train_time
     } else {
       # figure out the best way to scale and center the data
-      X_train <- scale(X[train_partition, ], scale = TRUE, center = TRUE)
-      X_test <- (X[test_partition, ] - attr(X_train, "scaled:center"))/attr(X_train, "scaled:scale")
+      #X_train <- scale(X[train_partition, ], scale = TRUE, center = TRUE)
+      #X_test <- (X[test_partition, ] - attr(X_train, "scaled:center"))/attr(X_train, "scaled:scale")
       start <- Sys.time()
       # model <- try(attr(ml_method(X_train, X_test, train_class = as.factor(data[train_partition, outcome_cname]), prob = TRUE), 
       #                   "prob"))

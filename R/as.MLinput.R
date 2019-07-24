@@ -137,6 +137,10 @@ as.MLinput <- function(X, Y, meta_colnames = NULL, categorical_features = FALSE,
         stop(paste(df_with_cat, " has categorical features detected, change these features to numeric or set 'categorical_features' to TRUE", 
                    sep = ""))
       }
+      # Change categorical features to dummy variables
+      X <- lapply(X, function(dsource, sample_cname){
+        ifelse(any(unist(lapply(dsource, is.factor))), yes = dummy_var_fun(dsource, sample_cname), no = dsource)
+      }, sample_cname = sample_cname)
     }
     
     # here we apply the allna_row_helper function to X and Y to remove all NA rows
@@ -387,4 +391,11 @@ build_x_mat <- function(cov_df){
     }
   }
   return(Xmatrix)
+}
+
+dummy_var_fun <- function(X, sample_cname){
+  dmy <- caret::dummyVars(formula = paste("`",sample_cname,"`", "~ .", sep = ""), data = X, fullRank = TRUE)
+  newX <- predict(dmy, newdata = X)
+  X <- cbind(X[, sample_cname], newX)
+  return(X)
 }

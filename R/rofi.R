@@ -256,6 +256,7 @@ rofi <- function(MLinput, source_alg_pairs, nn = 1, f_prob=0.1 , nu=1/100,
   })
   
   importance <- data.frame(t(do.call("rbind", final_fvecs)))
+  colnames(importance) <- paste("Iteration",1:ncol(importance))
   importance_metric <- rowSums(importance)/ncol(importance)
   importance <- cbind(importance_metric, importance)
   importance <- cbind(feature_map, importance) %>% dplyr::select(-Position)
@@ -267,7 +268,9 @@ rofi <- function(MLinput, source_alg_pairs, nn = 1, f_prob=0.1 , nu=1/100,
   }
   aucs <- do.call("rbind", aucs)
   colnames(aucs)[-c(1:3)] <- feature_map$Feature 
-  return(list(importance, aucs))
+  results_obj <- list(importance, aucs)
+  class(results_obj) <- "featSelect"
+  return(results_obj)
 }
 
 fvecLearning <- function(featurizedMLinput, source_alg_pairs, previous_run = NULL, to_update = NULL, supervised = FALSE){

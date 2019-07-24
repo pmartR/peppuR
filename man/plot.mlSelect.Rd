@@ -4,13 +4,15 @@
 \alias{plot.mlSelect}
 \title{Plots an object of class mlSelect}
 \usage{
-plot.mlSelect(results_object, roc_curves = TRUE, time_chart = FALSE,
+plot.mlSelect(mlSelect_object, roc_curves = TRUE, time_chart = TRUE,
   ...)
 }
 \arguments{
-\item{uniFiltRes}{an object of the class 'uniFiltRes', usually created by \code{\link{univariate_feature_selection}}.}
+\item{mlSelect_object}{an object of the class 'mlSelect', usually created by \code{\link{MLSelection}}.}
 
-\item{pval_threshold}{is the cutoff value for pvalues, can be a single value or a vector of distinct pvalues}
+\item{roc_curves}{logical indicator for plotting ROC curves}
+
+\item{time_chart}{logical indicator for plotting method run times}
 }
 \value{
 plots ggplot2 object

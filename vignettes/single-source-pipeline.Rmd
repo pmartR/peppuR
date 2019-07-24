@@ -96,9 +96,11 @@ The output of the MLwrapper adds attributes to the data object. The most importa
 knitr::kable(data.frame(output_probabilities)[1:10,], row.names = FALSE)
 ```
 
-We can look at reciever operating characteristics (ROC) with a ROC curve:
+We can look at receiver operating characteristics (ROC) with a ROC curve:
 ```{r}
 library(ggplot2)
+#plot(rf_results, roc = TRUE)
+
 temp <- AUC::roc(output_probabilities$rf$PredictedProbs.1, labels = output_probabilities$rf$Truth)
 
 ggplot(data.frame(fpr = temp$fpr, tpr = temp$tpr), aes(x = fpr, y = tpr))+
@@ -110,17 +112,16 @@ ggplot(data.frame(fpr = temp$fpr, tpr = temp$tpr), aes(x = fpr, y = tpr))+
 
 #### Ensemble Feature Selection
 
-```{r}
+```{r, cache=TRUE}
 #-----ROFI------#
 source_alg_pairs <- "rf"
 names(source_alg_pairs) <- "DS_1"
-rofi_results <- rofi(single_source_peppuRobj, source_alg_pairs, nn = 1, f_prob=0.4 ,
-                     nu=1/100, conv_check = 30,maxIter=50,epsilon = 0.01,verbose=FALSE)
+rofi_results <- rofi(single_source_peppuRobj, source_alg_pairs, nn = 10, f_prob=0.4 ,
+                     nu=1/100, conv_check = 40,max_iter=50,epsilon = 0.01, after_conv_checks = 5)
 ```
+
 ```{r}
-rown <- length(rofi_results[[1]]$AllAUC)
-fveci <- rofi_results[[1]]$f_Vectors[rown,]
-final_fvec <- 0 +fveci/1
-qplot(1:length(final_fvec),final_fvec)+xlab("Variable Index")+ylab("% Times Chosen")
+source("../R/plot_rofi.R")
+plot.rofi(rofi_results)
 ```
 
