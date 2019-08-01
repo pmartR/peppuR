@@ -3,7 +3,7 @@
 #'This function creates an object that is ready to be used with peppuR package
 #'functions
 #'
-#' @importFrom magrittr "%>%"
+#'@importFrom magrittr "%>%"
 #'
 #'@param X data.frame or a list of data.frames all with n rows, f+1 columns, where one of the columns is a unique
 #'  sample identifier
@@ -87,7 +87,7 @@ as.MLinput <- function(X, Y, meta_colnames = NULL, categorical_features = FALSE,
             }
           }
         }
-
+        
         # make Y a data frame arranged by sample name
         Y <- raw_Y %>% 
           purrr::reduce(dplyr::left_join, by = sample_cname)
@@ -101,7 +101,12 @@ as.MLinput <- function(X, Y, meta_colnames = NULL, categorical_features = FALSE,
     }
   }
   
-  #------ If X is a list... ----------#
+  #----- if X is a data frame, turn it to a list --------#
+  if (inherits(X, "data.frame")) {
+    temp <- vector("list")
+    temp$source1 <- X
+    X <- temp
+  }
   if (inherits(X, "list")) {
     # X should be a named list, if not assign generic names to the list
     if (is.null(names(X))) {
@@ -138,9 +143,20 @@ as.MLinput <- function(X, Y, meta_colnames = NULL, categorical_features = FALSE,
                    sep = ""))
       }
       # Change categorical features to dummy variables
-      X <- lapply(X, function(dsource, sample_cname){
-        ifelse(any(unist(lapply(dsource, is.factor))), yes = dummy_var_fun(dsource, sample_cname), no = dsource)
-      }, sample_cname = sample_cname)
+###################################################################################
+      for(i in 1:length(X)){
+        dsource <- X[[i]]
+        if(any(unlist(lapply(dsource, is.factor)))){
+          X[[i]] <- dummy_var_fun(dsource, sample_cname)
+        } 
+      } 
+      # X <- lapply(X, function(dsource, sample_cname){
+      #    else {
+      #     result <- dsource
+      #   }
+      #   return(result)
+      #   #ifelse(any(unlist(lapply(dsource, is.factor))), yes = dummy_var_fun(dsource, sample_cname), no = dsource)
+      # }, sample_cname = sample_cname)
     }
     
     # here we apply the allna_row_helper function to X and Y to remove all NA rows
@@ -193,72 +209,15 @@ as.MLinput <- function(X, Y, meta_colnames = NULL, categorical_features = FALSE,
     number_of_features <- as.data.frame(lapply(X, function(d_source){
       return(sum(!colnames(d_source) %in% sample_cname))
     }))
-    row.names(number_of_features) <- "n_features"
+    #row.names(number_of_features) <- "n_features"
     
     # setting list attributes
     attr(output_list, "cnames") <- list(sample_cname = sample_cname, outcome_cname = outcome_cname, pair_cname = pair_cname)
-    attr(output_list, "data_info") <- list(number_of_samples = number_of_samples, number_of_features = number_of_features, 
+    attr(output_list, "data_info") <- list(number_of_samples = number_of_samples, number_of_features = unlist(number_of_features), 
                                            paired = !is.null(pair_cname))
     attr(output_list, "categorical_columns") = list(categorical_cols = cat_cols)
     #----- if X is a single data frame --------#
-  } else if (inherits(X, "data.frame")) {
-    passed_checks = MLinput_helper(x_df = X, y_df = Y, sample_cname = sample_cname, outcome_cname = outcome_cname, pair_cname = pair_cname)
-    if (categorical_features) {
-      #X <- type.convert(X)
-    }
-    categorical_list = unlist(lapply(X[, -which(names(X) == sample_cname)], is.factor))
-    if (sum(categorical_list) >= 1) {
-      cat_cols = names(which(categorical_list == TRUE))
-      if (!categorical_features) {
-        stop(paste(sum(categorical_list), " categorical features detected, change these features to numeric or set 'categorical_features' to TRUE", sep = "")) 
-      }
-    } else {
-      cat_cols <- NULL
-    }
-    
-    
-    # here we apply the allna_row_helper function to X and Y to remove all NA rows
-    allna_row_results = allna_row_helper(x = X, y = Y, sample_cname = sample_cname, outcome_cname = outcome_cname, pair_cname = pair_cname)
-    allna_rows = unlist(allna_row_results)
-    
-    if (length(allna_rows) >= 1) {
-      x_inds = which(X[[sample_cname]] %in% allna_rows)
-      X = X[-x_inds, ]
-      
-      y_inds = which(Y[[sample_cname]] %in% allna_rows)
-      Y = Y[-y_inds, ]
-    }
-    
-    # key X and Y by sample id
-    rownames(X) <- as.character(X[, sample_cname])
-    rownames(Y) <- as.character(Y[, sample_cname])
-    
-    # remove sample id from X
-    # X <- X %>%
-    #   dplyr::select(-sample_cname)
-    
-    # create output list
-    output_list = list(X = X, Y = Y)
-    
-    # set number of sources attribute
-    attr(output_list, "n_sources") = 1
-    
-    # check for NA values in the columns of data frames stored in 'X' list
-    na_df = as.data.frame(colSums(is.na(X))/nrow(X))
-    names(na_df) = "NA percent per column"
-    
-    # set has_na attribute
-    has_na = ifelse(any(na_df[, "NA percent per column"] > 0), yes = TRUE, no = FALSE)
-    attr(output_list, "has_na") = has_na
-    
-    # set missing_data attribute
-    attr(output_list, "missing_data") = na_df
-    
-    # setting list attributes
-    attr(output_list, "cnames") = list(sample_cname = sample_cname, outcome_cname = outcome_cname, pair_cname = pair_cname)
-    attr(output_list, "data_info") = list(number_of_samples = nrow(Y), number_of_features = ncol(X), paired = !is.null(pair_cname))
-    attr(output_list, "categorical_columns") = list(categorical_cols = cat_cols)
-  }
+  } else {stop("X must be a list or a data.frame")}
   
   # adding 'MLinput' class to output_list
   class(output_list) = c("MLinput", "list")
@@ -396,6 +355,9 @@ build_x_mat <- function(cov_df){
 dummy_var_fun <- function(X, sample_cname){
   dmy <- caret::dummyVars(formula = paste("`",sample_cname,"`", "~ .", sep = ""), data = X, fullRank = TRUE)
   newX <- predict(dmy, newdata = X)
-  X <- cbind(X[, sample_cname], newX)
+  newX <- as.data.frame(newX)
+  X <- X %>%
+    dplyr::select(sample_cname) %>%
+    cbind(newX)
   return(X)
 }
