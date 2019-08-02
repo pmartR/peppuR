@@ -23,7 +23,7 @@ MLSelection <- function(data_object, partition_style = 'random', folds = 3, repe
   data_object <- dataPartitioning(data_object, partition_style = partition_style, folds = folds, repeats = repeats)
   #setup algorithm information
   if(algorithms == 'all') {
-    used_methods <- c("knn", "rf", "nb", "svm")
+    used_methods <- c("knn", "rf", "nb", "svm", "lda")
   } else {
     used_methods <- algorithms
   }

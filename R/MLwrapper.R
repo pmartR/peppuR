@@ -66,7 +66,7 @@ MLwrapper = function(data_object, methods, scale_and_center = FALSE, single_sour
     if (is.null(single_source)) {
       if (length(methods) != n_sources) 
         stop("the number of methods provided in 'method' argument is not equal to the number of sources in 'data_object'")
-    }
+    
     
     # extract parts from data_object
     x_data = data_object$X
@@ -90,9 +90,9 @@ MLwrapper = function(data_object, methods, scale_and_center = FALSE, single_sour
     
     attr(data_object, "ML_results") = ml_rez_list
     attr(data_object, "ML_method") = methods
-    
+    }
     # case where single_source is provided
-    if (!is.null(single_source)) {
+    else if (!is.null(single_source)) {
       
       # extract parts from data_object
       x_data = data_object$X
@@ -204,7 +204,7 @@ MLwrapper_helper = function(method, X, data, partition_info, scale_and_center, o
       if (method == "lda") {
         pred_prob <- predict(model, newdata = X[test_partition, , drop = FALSE])$posterior
       } else if (method == "rf") {
-        pred_prob <- predict(model, data = X[test_partition, , drop = FALSE])$predictions
+        pred_prob <- predict(model, data = data.frame(X[test_partition, , drop = FALSE]))$predictions
         #pred_prob <- data.frame(1 - as.numeric(pred_prob), pred_prob)
         colnames(pred_prob) <- c("0", "1")
       } else if (method == "svm") {
@@ -250,12 +250,6 @@ MLwrapper_helper = function(method, X, data, partition_info, scale_and_center, o
   result = as.data.frame(result)
   result = lapply(result, as.data.frame, stringsAsFactors = FALSE)
   result = do.call(rbind, result)
-  # avg_time <- result %>%
-  #   dplyr::group_by(Partition_info) %>%
-  #   dplyr::summarise(Times = dplyr::first(Time)) 
-  # result <- result %>%
-  #   dplyr::select(Time)
-
   
   return(result)
 }
