@@ -1,5 +1,6 @@
 # require(randomForest)
 require(ranger)
+#' Random Forest method
 #' @param X - n-by-p data.frame containing all of the 'covariates' that will be used to predict class of y
 #' @param data - a data.frame with columns:
 #'           y - n vector of class identifiers for each for of X
@@ -9,6 +10,7 @@ require(ranger)
 #' @param ... - additional arguements passed to BGLR(...)
 #' 
 #' @return the object created by ranger::randomforest
+#' @rdname peppuR_rf
 #' @export
 
 peppuR_rf <- function(X, data, outcome_cname, ...) {
@@ -28,6 +30,7 @@ peppuR_rf <- function(X, data, outcome_cname, ...) {
 
 require(kernlab)
 
+#' SVM method
 #' @param X - n-by-p data.frame containing all of the 'covariates' that will be used to predict class of y
 #' @param data - a data.frame with columns:
 #'           y - n vector of class identifiers for each for of X
@@ -37,6 +40,7 @@ require(kernlab)
 #' @param oneclass - if pair information is provided, should a one-class SVM be built?
 #' @param ... - additional arguements passed to BGLR(...)
 #' @return the object created by kernlab::svm
+#' @rdname peppuR_svm
 #' @export
 
 peppuR_svm <- function(X, data, outcome_cname, ...) {
@@ -51,7 +55,7 @@ peppuR_svm <- function(X, data, outcome_cname, ...) {
 }
 
 require(MASS)
-
+#' LDA method
 #' @param X - n-by-p data.frame containing all of the 'covariates' that will be used to predict class of y
 #' @param data - a data.frame with columns:
 #'           y - n vector of class identifiers for each for of X
@@ -61,17 +65,19 @@ require(MASS)
 #' @param ... - additional arguements passed to BGLR(...)
 #' 
 #' @return the object created by MASS::lda
+#' @rdname peppuR_lda
 #' @export
 
 peppuR_lda <- function(X, data, outcome_cname, ...) {
   # set.seed(42)
-  lda_fit <- lda(x = X, grouping = as.factor(data[[outcome_cname]]), ...)
+  lda_fit <- MASS::lda(x = X, grouping = as.factor(data[[outcome_cname]]), ...)
   return(lda_fit)
 }
 
 
 require(caret)
 
+#' KNN method
 #' @param X - n-by-p data.frame containing all of the 'covariates' that will be used to predict class of y
 #' @param data - a data.frame with columns:
 #'           y - n vector of class identifiers for each for of X
@@ -81,6 +87,7 @@ require(caret)
 #' @param ... - additional arguements passed to BGLR(...)
 #' 
 #' @return the object created by caret::knn3Train
+#' @rdname peppuR_knn
 #' @export
 
 peppuR_knn <- function(X_train, X_test, train_class, train_partition, test_partition, ...) {
@@ -91,6 +98,7 @@ peppuR_knn <- function(X_train, X_test, train_class, train_partition, test_parti
 # require(e1071)
 require(naivebayes)
 
+#' Naive Bayes method
 #' @param X - n-by-p data.frame containing all of the 'covariates' that will be used to predict class of y
 #' @param data - a data.frame with columns:
 #'           y - n vector of class identifiers for each for of X
@@ -99,6 +107,7 @@ require(naivebayes)
 #'        time - n vector of time point identifiers
 #' @param ... - additional arguements passed to BGLR(...)
 #' @return the object created by naivebayes::naive_bayes
+#' @rdname peppuR_nb
 #' @export
 
 peppuR_nb <- function(X, data, pair_cname, outcome_cname, sample_cname, ...) {
