@@ -8,7 +8,7 @@ plot.mlSelect(mlSelect_object, roc_curves = TRUE, time_chart = TRUE,
   ...)
 }
 \arguments{
-\item{mlSelect_object}{an object of the class 'mlSelect', usually created by \code{\link{MLSelection}}.}
+\item{mlSelect_object}{an object of the class 'mlSelect', usually created by}
 
 \item{roc_curves}{logical indicator for plotting ROC curves}
 

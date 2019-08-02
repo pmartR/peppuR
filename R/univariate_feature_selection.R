@@ -48,15 +48,17 @@ univariate_feature_selection = function(data_object){
   categorical_cols = attr(data_object, "categorical_columns")$categorical_cols
   
   #case where x is a single data frame
-  if(n_sources == 1){
-      x_result = test_helper(x_mat = x, categorical_cols = categorical_cols, y_mat = y, sample_cname = sample_cname, pair_cname = pair_cname, outcome_cname = outcome_cname)
-  }
+  # if(n_sources == 1){
+  #     x_result = test_helper(x_mat = x, categorical_cols = categorical_cols, y_mat = y, sample_cname = sample_cname, pair_cname = pair_cname, outcome_cname = outcome_cname)
+  # }
   #case where x is a list of data frames
-  else if(n_sources > 1){
-      x_result = mapply(test_helper, x, categorical_cols, MoreArgs = list(y, sample_cname, pair_cname, outcome_cname), USE.NAMES = T)
+  #else if(n_sources > 1){
+      x_result = mapply(test_helper, x, categorical_cols,
+                        MoreArgs = list(y, sample_cname, pair_cname,
+                                        outcome_cname), USE.NAMES = T)
       x_result = as.data.frame(x_result)
       x_result = lapply(x_result, as.data.frame, stringsAsFactors = F)
-  }
+#  }
   
   #add number of sources attribute to x_result
   attr(x_result, "n_sources") = n_sources

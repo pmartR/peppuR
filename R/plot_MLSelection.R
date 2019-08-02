@@ -2,7 +2,7 @@
 #' 
 #' For plotting an S3 object of type 'uniFiltRes'
 #'
-#' @param mlSelect_object an object of the class 'mlSelect', usually created by \code{\link{MLSelection}}.
+#' @param mlSelect_object an object of the class 'mlSelect', usually created by 
 #' @param roc_curves logical indicator for plotting ROC curves
 #' @param time_chart logical indicator for plotting method run times
 #' 

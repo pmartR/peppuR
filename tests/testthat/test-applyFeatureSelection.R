@@ -50,7 +50,7 @@ apply_multi_fs = applyFeatureSelection(multi_results, multi_ufs_result, pval_thr
 test_that("output tests for single source applyFeatureSelection", {
   expect_that(apply_fs, is_a("list"))
   expect_that(length(apply_fs), equals(2))
-  expect_equal( sum(ufs_result$p_value > 0.05), (sum(attributes(result)$data_info$number_of_features) - ncol(apply_fs$X)) )
+  expect_equal( sum(ufs_result$source1$p_value > 0.05), (sum(attributes(result)$data_info$number_of_features) - (ncol(apply_fs$X$source1)-1)) )#subtract 1 for ID column
   expect_error(applyFeatureSelection(result,ufs_result, pval_threshold = 1.2))
   expect_error(applyFeatureSelection(result, ufs_result, pval_threshold = c(0.2, 0.2)))
   

@@ -1,0 +1,124 @@
+# require(randomForest)
+require(ranger)
+#' @param X - n-by-p data.frame containing all of the 'covariates' that will be used to predict class of y
+#' @param data - a data.frame with columns:
+#'           y - n vector of class identifiers for each for of X
+#'          ID - n vector of patient IDs
+#'        pair - vector of pair identifiers
+#'        time - n vector of time point identifiers
+#' @param ... - additional arguements passed to BGLR(...)
+#' 
+#' @return the object created by ranger::randomforest
+#' @export
+
+peppuR_rf <- function(X, data, outcome_cname, ...) {
+  
+  # Can't add pair information into a random forest like this if(length(data$pair)>0){ If pair information was provided, add it to
+  # the data matrix warning('There is probably a better way to include pair information into a random forest') pair_mat <-
+  # build_x_mat(data.frame(pair=as.factor(data$pair))) X <- cbind(X,pair_mat) } set.seed(42) rf_fit <- randomForest(x=X,
+  # y=as.factor(data$y)) If you try to use the formula 'y~.' you will likely get the error: 'Error: protect(): protection stack
+  # overflow' so I switched to the 'dependent.variable.name='y'' interface as suggested here:
+  # https://github.com/imbs-hl/ranger/issues/103
+  rf_fit <- ranger::ranger(data = data.frame(y = data[outcome_cname], X),
+                           dependent.variable.name = outcome_cname,
+                           importance = "impurity",
+                           probability = TRUE)
+  return(rf_fit)
+}
+
+require(kernlab)
+
+#' @param X - n-by-p data.frame containing all of the 'covariates' that will be used to predict class of y
+#' @param data - a data.frame with columns:
+#'           y - n vector of class identifiers for each for of X
+#'          ID - n vector of patient IDs
+#'        pair - vector of pair identifiers
+#'        time - n vector of time point identifiers
+#' @param oneclass - if pair information is provided, should a one-class SVM be built?
+#' @param ... - additional arguements passed to BGLR(...)
+#' @return the object created by kernlab::svm
+#' @export
+
+peppuR_svm <- function(X, data, outcome_cname, ...) {
+  # print(...)
+  
+  if (all(as.numeric(data[[outcome_cname]]) >= 0)) {
+    # Translate Y=0/1 to Y=-1/1
+    data[outcome_cname] <- 2 * as.numeric(data[[outcome_cname]]) - 1
+  }
+  
+  return(kernlab::ksvm(x = data.matrix(X), y = data[outcome_cname], prob.model = TRUE, verbose = FALSE, ...))
+}
+
+require(MASS)
+
+#' @param X - n-by-p data.frame containing all of the 'covariates' that will be used to predict class of y
+#' @param data - a data.frame with columns:
+#'           y - n vector of class identifiers for each for of X
+#'          ID - n vector of patient IDs
+#'        pair - vector of pair identifiers
+#'        time - n vector of time point identifiers
+#' @param ... - additional arguements passed to BGLR(...)
+#' 
+#' @return the object created by MASS::lda
+#' @export
+
+peppuR_lda <- function(X, data, outcome_cname, ...) {
+  # set.seed(42)
+  lda_fit <- lda(x = X, grouping = as.factor(data[[outcome_cname]]), ...)
+  return(lda_fit)
+}
+
+
+require(caret)
+
+#' @param X - n-by-p data.frame containing all of the 'covariates' that will be used to predict class of y
+#' @param data - a data.frame with columns:
+#'           y - n vector of class identifiers for each for of X
+#'          ID - n vector of patient IDs
+#'        pair - vector of pair identifiers
+#'        time - n vector of time point identifiers
+#' @param ... - additional arguements passed to BGLR(...)
+#' 
+#' @return the object created by caret::knn3Train
+#' @export
+
+peppuR_knn <- function(X_train, X_test, train_class, train_partition, test_partition, ...) {
+  knn_fit = knn3Train(X_train, X_test, cl = train_class, ...)
+  return(knn_fit)
+}
+
+# require(e1071)
+require(naivebayes)
+
+#' @param X - n-by-p data.frame containing all of the 'covariates' that will be used to predict class of y
+#' @param data - a data.frame with columns:
+#'           y - n vector of class identifiers for each for of X
+#'          ID - n vector of patient IDs
+#'        pair - vector of pair identifiers
+#'        time - n vector of time point identifiers
+#' @param ... - additional arguements passed to BGLR(...)
+#' @return the object created by naivebayes::naive_bayes
+#' @export
+
+peppuR_nb <- function(X, data, pair_cname, outcome_cname, sample_cname, ...) {
+  
+  #Remove sample_cname columns from X
+  #X <- X[,-which(colnames(X)==sample_cname)]
+  if(!is.null(pair_cname)){
+    if (length(data[[pair_cname]]) > 0) {
+      # If pair information was provided, add it to the data matrix 
+      #X <- cbind(X, pair = as.factor(data[[pair_cname]]))
+    }
+    # set.seed(42) nb_fit <- naiveBayes(x=X, y=data$y,...)
+    ## BS Comment 5/29: did you mean "pair_cname" here or "outcome_cname"?
+    nb_fit <- naivebayes::naive_bayes(x = X, y = as.factor(data[[outcome_cname]]))
+  }else{
+    # BS comment 5/29: very rough fix for now to drop "ID" column
+    nb_fit <- naivebayes::naive_bayes(x = X, y = data[[outcome_cname]])
+  }
+  return(nb_fit)
+}
+
+
+

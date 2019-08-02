@@ -26,22 +26,25 @@ applyCorrelationFilter <- function(data_object, corFilt_object, threshold){
   if (length(threshold) != n_sources) {
     stop("the number of correlation threshold values must match the number of sources")
   }
-  # cases where n_sources == 1 and n_sources > 1
-  if (n_sources == 1) {
-    new_x = applyFilt_helper(x_mat = x, corFilt_obj = corFilt_object, sample_cname = sample_cname, thresh=threshold)
-    newx_att = attr(new_x, "features_removed")
-    data_object$X = new_x
-    attr(data_object, "correlation_features_rm") = newx_att
-    attr(data_object, "correlationFiltering") = TRUE
-  } else if (n_sources > 1) {
-    new_x_list = mapply(applyFilt_helper, x, corFilt_object, threshold, MoreArgs = list(sample_cname), USE.NAMES = TRUE)
+  #cases where n_sources == 1 and n_sources > 1
+  # if (n_sources == 1) {
+  #   new_x = applyFilt_helper(x_mat = x[[1]], corFilt_obj = corFilt_object, sample_cname = sample_cname, thresh=threshold)
+  #   newx_att = attr(new_x, "features_removed")
+  #   data_object$X [[1]]= new_x
+  #   attr(data_object, "correlation_features_rm") = newx_att
+  #   attr(data_object, "correlationFiltering") = TRUE
+  # } else if (n_sources > 1) {
+    new_x_list <- mapply(applyFilt_helper, x, corFilt_object, threshold, MoreArgs = list(sample_cname), USE.NAMES = TRUE, SIMPLIFY = FALSE)
+    # if (n_sources == 1) {
+    #   new_x_list <- new_x_list[[1]]
+    # }
     newx_list_att = lapply(new_x_list, function(item) {
       attr(item, "features_removed")
     })
     data_object$X = new_x_list
     attr(data_object,  "correlation_features_rm") = newx_list_att
     attr(data_object, "correlationFiltering") = TRUE
-  }
+  #}
 #  plot(ccres, mincor = 0.7)
   return(data_object)
 }

@@ -91,11 +91,11 @@ as.MLinput <- function(X, Y, meta_colnames = NULL, categorical_features = FALSE,
         # make Y a data frame arranged by sample name
         Y <- raw_Y %>% 
           purrr::reduce(dplyr::left_join, by = sample_cname)
-        X <- lapply(X, function(d_source){
-          subX <- d_source[which(d_source[,sample_cname] %in% Y[,sample_cname]), ]
-          newX <- build_x_mat(subX)
-          return(newX)
-        } )
+        # X <- lapply(X, function(d_source){
+        #   subX <- d_source[which(d_source[,sample_cname] %in% Y[,sample_cname]), ]
+        #   newX <- build_x_mat(subX)
+        #   return(newX)
+        # } )
         
       }
     }
@@ -143,13 +143,16 @@ as.MLinput <- function(X, Y, meta_colnames = NULL, categorical_features = FALSE,
                    sep = ""))
       }
       # Change categorical features to dummy variables
-###################################################################################
+      cat_cols <- vector("list", length(X))
       for(i in 1:length(X)){
         dsource <- X[[i]]
         if(any(unlist(lapply(dsource, is.factor)))){
-          X[[i]] <- dummy_var_fun(dsource, sample_cname)
+          temp <- dummy_var_fun(dsource, sample_cname)
+          X[[i]] <- temp[[1]]
+          cat_cols[[i]] <- temp[[2]]
         } 
-      } 
+      }
+      names(cat_cols) <- names(X)
       # X <- lapply(X, function(dsource, sample_cname){
       #    else {
       #     result <- dsource
@@ -180,6 +183,7 @@ as.MLinput <- function(X, Y, meta_colnames = NULL, categorical_features = FALSE,
       #   dplyr::select(-sample_cname) #remove sample id
       return(df)
     })
+    
     # key Y by sample id
     rownames(Y) <- as.character(Y[, sample_cname])
     
@@ -218,6 +222,13 @@ as.MLinput <- function(X, Y, meta_colnames = NULL, categorical_features = FALSE,
     attr(output_list, "categorical_columns") = list(categorical_cols = cat_cols)
     #----- if X is a single data frame --------#
   } else {stop("X must be a list or a data.frame")}
+  
+  # Finally convert X to a matrix for learning
+  X <- lapply(X, function(d_source){
+    subX <- d_source[which(d_source[,sample_cname] %in% Y[,sample_cname]), ]
+    newX <- build_x_mat(subX)
+    return(newX)
+  } )
   
   # adding 'MLinput' class to output_list
   class(output_list) = c("MLinput", "list")
@@ -359,5 +370,10 @@ dummy_var_fun <- function(X, sample_cname){
   X <- X %>%
     dplyr::select(sample_cname) %>%
     cbind(newX)
-  return(X)
+  new_categorical_names <- names(newX)[!names(newX) %in% dmy$vars]
+  return(list(X, new_categorical_names))
+  
+  
+  
+  
 }
