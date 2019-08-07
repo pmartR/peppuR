@@ -1,5 +1,6 @@
 context("rofi")
 library(peppuR)
+library(kernlab)
 data("multi_source")
 
 x_multi = multi_source$X

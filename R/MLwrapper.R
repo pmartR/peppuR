@@ -3,7 +3,6 @@ require(naivebayes)
 require(ranger)
 require(caret)
 require(MASS)
-
 #' Applies ML algorithms to partitioned data
 #'
 #' This function applies ML algorithms to 'MLinput' object
@@ -208,7 +207,7 @@ MLwrapper_helper = function(method, X, data, partition_info, scale_and_center, o
         #pred_prob <- data.frame(1 - as.numeric(pred_prob), pred_prob)
         colnames(pred_prob) <- c("0", "1")
       } else if (method == "svm") {
-        pred_prob <- predict(model, newdata = X[test_partition, , drop = FALSE], type = "prob")
+        pred_prob <- predict(model, newdata = X[test_partition, , drop = FALSE])
         pred_prob <- 1/(1 + exp(-pred_prob))
         pred_prob <- data.frame(1 - pred_prob, pred_prob)
         colnames(pred_prob) <- c("0", "1")
