@@ -1,6 +1,6 @@
-context("MLSelectionSingleSource")
 library(peppuR)
-
+library(MASS)
+library(kernlab)
 #------ Single Source -------#
 # Add subject names to the data
 birthweight_data <- MASS::birthwt
