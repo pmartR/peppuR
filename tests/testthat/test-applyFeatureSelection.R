@@ -1,4 +1,3 @@
-context("applyFeatureSelection")
 library(peppuR)
 library(caret)
 library(MASS)
@@ -62,3 +61,11 @@ test_that("output tests for multi source applyFeatureSelection", {
   expect_equal(sum(unlist(lapply(multi_ufs_result, function(x) x$p_value > 0.2))), sum(attributes(multi_results)$data_info$number_of_features)-sum(unlist(lapply(apply_multi_fs$X, function(x) ncol(x)-1))) )
   expect_error(applyFeatureSelection(multi_results, multi_ufs_result, pval_threshold = 0.2))
   })
+
+p <- plot(ufs_result, pval_threshold = 0.1)
+test_that("plotting works",{
+  expect_true(is(p, "ggplot"))
+})
+
+
+

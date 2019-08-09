@@ -27,5 +27,6 @@ Imports:
     missForest,
     ModelMetrics,
     AUC,
-    mice
+    mice,
+    reshape2
 VignetteBuilder: knitr
