@@ -2,6 +2,7 @@ require(kernlab)
 require(naivebayes)
 require(ranger)
 require(caret)
+require(MASS)
 #' Applies ML algorithms to partitioned data
 #'
 #' This function applies ML algorithms to 'MLinput' object
@@ -31,39 +32,40 @@ MLwrapper = function(data_object, methods, scale_and_center = FALSE, single_sour
   n_sources = attr(data_object, "n_sources")
   
   # check if single_source is provided then data_object must have more than one data source
-  if (!is.null(single_source) & n_sources == 1) 
-    stop("'single_source' can only be provided when 'data_object' has only one data source")
-  
+  # if (!is.null(single_source) & n_sources == 1) 
+  #   stop("'single_source' can only be provided when 'data_object' has more than one data source")
+  # 
   # case where n_sources is 1
-  if (n_sources == 1) {
+  #if (n_sources == 1) {
     # extract parts from data_object
-    x_data = data_object$X
-    y_data = data_object$Y
-    
-    part_info = attr(data_object, "partition_info")
-    
-    # extract cnames
-    sample_cname = attr(data_object, "cnames")$sample_cname
-    outcome_cname = attr(data_object, "cnames")$outcome_cname
-    pair_cname = attr(data_object, "cnames")$pair_cname
-    
-    # sample_cname column index
-    samp_ind = which(names(x_data) %in% sample_cname)
-    
-    # loop over the list of methods and apply them with the MLwrapper_helper
-    ml_rez = lapply(methods, MLwrapper_helper, x_data, y_data, part_info, scale_and_center, outcome_cname, pair_cname, sample_cname)
-    names(ml_rez) = methods
-    
-    attr(data_object, "ML_results") = ml_rez
-    attr(data_object, "ML_method") = methods
-    
-  } else if (n_sources > 1) {
+    # x_data = data_object$X
+    # y_data = data_object$Y
+    # 
+    # part_info = attr(data_object, "partition_info")
+    # 
+    # # extract cnames
+    # sample_cname = attr(data_object, "cnames")$sample_cname
+    # outcome_cname = attr(data_object, "cnames")$outcome_cname
+    # pair_cname = attr(data_object, "cnames")$pair_cname
+    # 
+    # # sample_cname column index
+    # samp_ind = which(names(x_data) %in% sample_cname)
+    # 
+    # # loop over the list of methods and apply them with the MLwrapper_helper
+    # ml_rez = lapply(methods, MLwrapper_helper, x_data, y_data, part_info, scale_and_center, outcome_cname, pair_cname, sample_cname)
+    # names(ml_rez) = methods
+    # 
+    # attr(data_object, "ML_results") = ml_rez
+    # attr(data_object, "ML_method") = methods
+    # 
+ # }
+   # else if (n_sources > 1) {
     # check that the length of 'method' vector is equal to n_sources, note this does not apply when 'single_source' argument is
     # provided
     if (is.null(single_source)) {
       if (length(methods) != n_sources) 
         stop("the number of methods provided in 'method' argument is not equal to the number of sources in 'data_object'")
-    }
+    
     
     # extract parts from data_object
     x_data = data_object$X
@@ -87,9 +89,9 @@ MLwrapper = function(data_object, methods, scale_and_center = FALSE, single_sour
     
     attr(data_object, "ML_results") = ml_rez_list
     attr(data_object, "ML_method") = methods
-    
+    }
     # case where single_source is provided
-    if (!is.null(single_source)) {
+    else if (!is.null(single_source)) {
       
       # extract parts from data_object
       x_data = data_object$X
@@ -122,7 +124,7 @@ MLwrapper = function(data_object, methods, scale_and_center = FALSE, single_sour
       attr(data_object, "single_source") = single_source
       
     }
-  }
+  #}
   
   return(data_object)
 }
@@ -201,7 +203,7 @@ MLwrapper_helper = function(method, X, data, partition_info, scale_and_center, o
       if (method == "lda") {
         pred_prob <- predict(model, newdata = X[test_partition, , drop = FALSE])$posterior
       } else if (method == "rf") {
-        pred_prob <- predict(model, data = X[test_partition, , drop = FALSE])$predictions
+        pred_prob <- predict(model, data = data.frame(X[test_partition, , drop = FALSE]))$predictions
         #pred_prob <- data.frame(1 - as.numeric(pred_prob), pred_prob)
         colnames(pred_prob) <- c("0", "1")
       } else if (method == "svm") {
@@ -247,12 +249,6 @@ MLwrapper_helper = function(method, X, data, partition_info, scale_and_center, o
   result = as.data.frame(result)
   result = lapply(result, as.data.frame, stringsAsFactors = FALSE)
   result = do.call(rbind, result)
-  # avg_time <- result %>%
-  #   dplyr::group_by(Partition_info) %>%
-  #   dplyr::summarise(Times = dplyr::first(Time)) 
-  # result <- result %>%
-  #   dplyr::select(Time)
-
   
   return(result)
 }

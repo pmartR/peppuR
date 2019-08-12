@@ -18,13 +18,14 @@ correlationFilter <- function(data_object){
   
   # cases where n_sources == 1 and n_sources > 1
   
-  if (n_sources == 1) {
-    covariates <- data_object$X[,-which(colnames(data_object$X) == sample_cname)]
-    cluster_obj <- klaR::corclust(covariates)
-  } else if (n_sources > 1) {
+  # if (n_sources == 1) {
+  #   covariates <- data_object$X[,-which(colnames(data_object$X) == sample_cname)]
+  #   cluster_obj <- klaR::corclust(covariates)
+  # } else if (n_sources > 1) {
+  
     covariates = lapply(data_object$X, function(data_source) data_source[,-which(colnames(data_source) == sample_cname)])
     cluster_obj <- lapply(covariates, function(source_cov) klaR::corclust(source_cov))
-  }
+#  }
   #assign class 'uniFiltRes' to x_result
   return(cluster_obj)
   # attr(data_object, "correlationFiltering") = TRUE

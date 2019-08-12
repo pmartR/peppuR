@@ -58,13 +58,13 @@ pairCorrection = function(data_object) {
     
     # cases where n_sources == 1 and n_sources > 1
     
-    if (n_sources == 1) {
-        new_x = projectPairs(Xdata = X, Ydata = y, sample_cname = sample_cname, pair_cname = pair_cname)
-        data_object$X = new_x
-    } else if (n_sources > 1) {
+    # if (n_sources == 1) {
+    #     new_x = projectPairs(Xdata = X, Ydata = y, sample_cname = sample_cname, pair_cname = pair_cname)
+    #     data_object$X = new_x
+    # } else if (n_sources > 1) {
         new_x_list = lapply(X, projectPairs, Ydata = y, sample_cname = sample_cname, pair_cname = pair_cname)
         data_object$X = new_x_list
-    }
+   # }
     
     attr(data_object, "pairCorrection") = TRUE
     

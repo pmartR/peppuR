@@ -30,7 +30,7 @@ test_that("Categorical checks mutli source as.MLinput", {
                           sample_cname = sample_cname, outcome_cname = outcome_cname,
                           pair_cname = pair_cname))
   expect_equal(attr(results, "categorical_columns")$categorical_cols$Demographics,
-               "Sex")
+               "Sex.Male")
  })
 
 test_that("Y columns are extracted", {

@@ -100,13 +100,15 @@ We can look at receiver operating characteristics (ROC) with a ROC curve:
 ```{r}
 library(ggplot2)
 #plot(rf_results, roc = TRUE)
+# 
+# temp <- AUC::roc(output_probabilities$source1.rf$PredictedProbs.1, labels = output_probabilities$source1.rf$Truth)
+# 
+# ggplot(data.frame(fpr = temp$fpr, tpr = temp$tpr), aes(x = fpr, y = tpr))+
+#   geom_line(color = "blue")+
+#   theme_bw()+
+#   ggtitle("Random Forest ROC")
 
-temp <- AUC::roc(output_probabilities$rf$PredictedProbs.1, labels = output_probabilities$rf$Truth)
-
-ggplot(data.frame(fpr = temp$fpr, tpr = temp$tpr), aes(x = fpr, y = tpr))+
-  geom_line(color = "blue")+
-  theme_bw()+
-  ggtitle("Random Forest ROC")
+plot(rf_results)[[1]]+ggtitle("Random Forest ROC")
 
 ```
 
@@ -116,12 +118,13 @@ ggplot(data.frame(fpr = temp$fpr, tpr = temp$tpr), aes(x = fpr, y = tpr))+
 #-----ROFI------#
 source_alg_pairs <- "rf"
 names(source_alg_pairs) <- "DS_1"
-rofi_results <- rofi(single_source_peppuRobj, source_alg_pairs, nn = 10, f_prob=0.4 ,
+rofi_results <- rofi(single_source_peppuRobj, source_alg_pairs, nn = 5, f_prob=0.4 ,
                      nu=1/100, conv_check = 40,max_iter=50,epsilon = 0.01, after_conv_checks = 5)
 ```
 
 ```{r}
-source("../R/plot_rofi.R")
-plot.rofi(rofi_results)
+#source("../R/plot_rofi.R")
+#plot.rofi(rofi_results)
+peppuR::plot.rofi(rofi_results)
 ```
 

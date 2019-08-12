@@ -40,6 +40,6 @@ multi_result <- suppressMessages(as.MLinput(X=x_multi, Y = y_multi, categorical_
 multiCorObj <- correlationFilter(multi_result)
 new_result <- applyCorrelationFilter(data_object = multi_result, corFilt_object = multiCorObj,threshold = rep(0.7, length(multi_result$X)))
 test_that("correlated feature is removed", {
-  expect_equal(attributes(new_result_single)$correlation_features_rm, "correlated_age")
+  expect_equal(attributes(new_result_single)$correlation_features_rm$source1, "correlated_age")
 })
 
