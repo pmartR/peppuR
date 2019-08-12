@@ -126,6 +126,5 @@ rofi_results <- rofi(single_source_peppuRobj, source_alg_pairs, nn = 5, f_prob=0
 #source("../R/plot_rofi.R")
 #plot.rofi(rofi_results)
 peppuR::plot.rofi(rofi_results)
-#plot(rofi_results)
 ```
 
