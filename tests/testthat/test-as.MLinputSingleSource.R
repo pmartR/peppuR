@@ -25,8 +25,8 @@ test_that("Categorical checks single source as.MLinput", {
   expect_error(as.MLinput(X = birthweight_data, Y = NULL, meta_colnames = c("low", "ID"),
                           categorical_features = FALSE , sample_cname = sample_cname,
                           outcome_cname = outcome_cname, pair_cname = pair_cname))
-  expect_equal(attr(result, "categorical_columns")$categorical_cols,
-               c("race", "smoke", "ht", "ui"))
+  expect_equal(attr(result, "categorical_columns")$categorical_cols$source1,
+               c("race.2","race.3", "smoke.1", "ht.1", "ui.1"))
   expect_equal(attr(as.MLinput(X = birthweight_data[, !colnames(birthweight_data) %in% c("race", "smoke", "ht", "ui")],
                Y = NULL, meta_colnames = c("low", "ID"),
                categorical_features = FALSE , sample_cname = sample_cname,
@@ -58,8 +58,8 @@ test_that("Output for as.MLinput is properly formatted", {
   expect_that(result, is_a("list"))
   expect_that(length(result), equals(2))
   expect_that(names(result), equals(c("X", "Y")))
-  expect_that(nrow(result$Y), equals(nrow(result$X)))
-  expect_that(result$Y[,sample_cname], equals(rownames(result$X)))
+  expect_that(nrow(result$Y), equals(nrow(result$X$source1)))
+  expect_that(result$Y[,sample_cname], equals(rownames(result$X$source1)))
   expect_that(ncol(result$Y), equals(length(unique(c(sample_cname, c("ID", "low"))))))
   expect_equal(result, as.MLinput(X = birthweight_data[,-(which(colnames(birthweight_data) == "low"))],
                                   Y = birthweight_data[,c("low","ID")], meta_colnames = NULL,
@@ -123,20 +123,20 @@ test_that("Missing rows are removed", {
   x_single_narows <- birthweight_data
   x_single_narows[c(4,6,8,10), 2:(ncol(x_single_narows)-1)] <- NA
   result_less_one <- as.MLinput(X = x_single_narows, Y = NULL, meta_colnames = c("low", "ID"), categorical_features = T, sample_cname, outcome_cname)
-  expect_that(nrow(result_less_one$X), equals(nrow(result$X)-4))
+  expect_that(nrow(result_less_one$X$source1), equals(nrow(result$X$source1)-4))
   birthweight_data$Pair <- rep(c(1,2,3), nrow(birthweight_data)/3)
   birthweight_data[1,2:(ncol(x_single_narows)-1)] <- NA
   paired_result <- as.MLinput(X=birthweight_data, Y = NULL, categorical_features = TRUE,
                               meta_colnames = c("low", "ID", "Pair"),
                               sample_cname = sample_cname, outcome_cname = outcome_cname,
                               pair_cname = "Pair")
-  expect_equal(nrow(paired_result$X), nrow(result$X)-1)
+  expect_equal(nrow(paired_result$X$source1), nrow(result$X$source1)-1)
   birthweight_data$Pair[1:2] <- 50
   paired_result2 <- as.MLinput(X=birthweight_data, Y = NULL, categorical_features = TRUE,
                               meta_colnames = c("low", "ID", "Pair"),
                               sample_cname = sample_cname, outcome_cname = outcome_cname,
                               pair_cname = "Pair")
-  expect_equal(nrow(paired_result2$X), nrow(result$X)-2)
+  expect_equal(nrow(paired_result2$X$source1), nrow(result$X$source1)-2)
   
 })
 

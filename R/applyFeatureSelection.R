@@ -49,35 +49,40 @@ applyFeatureSelection = function(data_object, ufs_result, pval_threshold) {
     
     # cases where n_sources == 1 and n_sources > 1
     
-    if (n_sources == 1) {
-        if (length(pval_threshold) != n_sources) {
-            stop("the number of pval_threshold values must match the number of sources")
-        }
-        if (pval_threshold > 1 | pval_threshold < 0) {
-            stop("pval_threshold must be between 0 and 1")
-        }
-        
-        new_x = applyFS_helper(x_mat = x, ufs_result = ufs_result, pval_thresh = pval_threshold)
-        newx_att = attr(new_x, "features_removed")
-        
-        data_object$X = new_x
-        attr(data_object, "ufs_features_rm") = newx_att
-    } else if (n_sources > 1) {
-        if (length(pval_threshold) != n_sources) {
-            stop("the number of pval_threshold values must match the number of sources")
-        }
-        if (any(pval_threshold > 1) | any(pval_threshold < 0)) {
-            stop("pval_threshold must be between 0 and 1")
-        }
-        
-        new_x_list = mapply(applyFS_helper, x, ufs_result, pval_threshold, USE.NAMES = T)
-        newx_list_att = lapply(new_x_list, function(item) {
-            attr(item, "features_removed")
-        })
-        
-        data_object$X = new_x_list
-        attr(data_object, "ufs_features_removed") = newx_list_att
+    #if (n_sources == 1) {
+    # if (length(pval_threshold) != n_sources) {
+    #     stop("the number of pval_threshold values must match the number of sources")
+    # }
+    # if (pval_threshold > 1 | pval_threshold < 0) {
+    #     stop("pval_threshold must be between 0 and 1")
+    # }
+    # 
+    # new_x = applyFS_helper(x_mat = x, ufs_result = ufs_result, pval_thresh = pval_threshold)
+    # newx_att = attr(new_x, "features_removed")
+    # 
+    # data_object$X = new_x
+    # attr(data_object, "ufs_features_rm") = newx_att
+    #} else if (n_sources > 1) {
+    if (length(pval_threshold) != n_sources) {
+        stop("the number of pval_threshold values must match the number of sources")
     }
+    if (any(pval_threshold > 1) | any(pval_threshold < 0)) {
+        stop("pval_threshold must be between 0 and 1")
+    }
+    
+    #new_x_list = mapply(applyFS_helper, x, ufs_result, pval_threshold, USE.NAMES = T)
+    new_x_list <- vector("list", length(x))
+    for(i in 1:length(x)){
+        new_x_list[[i]] <- applyFS_helper(x[[i]], ufs_result[[i]], pval_threshold[[i]])
+    }
+    names(new_x_list) <- names(x)
+    newx_list_att = lapply(new_x_list, function(item) {
+        attr(item, "features_removed")
+    })
+    
+    data_object$X = new_x_list
+    attr(data_object, "ufs_features_removed") = newx_list_att
+    #}
     return(data_object)
 }
 

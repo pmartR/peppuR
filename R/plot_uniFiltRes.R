@@ -67,22 +67,22 @@ plot.uniFiltRes <- function(uniFilt_results, pval_threshold = NULL) {
     
     if (!is.null(pval_threshold)) {
         
-        if (n_sources == 1) {
-            pvals = uniFilt_results$p_value
-            
-            # lets check which features are below pval_threshold and which are over
-            features_below = length(which(pvals < pval_threshold))
-            features_above = length(which(pvals > pval_threshold))
-            
-            # create plot data
-            feature_type = c(rep("kept", features_below), rep("filtered", features_above))
-            plot_data = as.data.frame(table(feature_type))
-            
-            p = ggplot2::ggplot(data = plot_data, ggplot2::aes(x = feature_type, y = Freq, fill = feature_type)) + ggplot2::geom_bar(stat = "identity", 
-                position = "dodge", width = 0.5) + ggplot2::ggtitle(paste("Features Filtered (", pval_threshold, " p-value threshold)", 
-                sep = "")) + ggplot2::xlab("data source") + ggplot2::ylab("Number of Features") + ggplot2::geom_text(aes(label = Freq), 
-                vjust = -0.3, color = "black", size = 3.5)
-        } else if (n_sources > 1) {
+        # if (n_sources == 1) {
+        #     pvals = uniFilt_results$p_value
+        #     
+        #     # lets check which features are below pval_threshold and which are over
+        #     features_below = length(which(pvals < pval_threshold))
+        #     features_above = length(which(pvals > pval_threshold))
+        #     
+        #     # create plot data
+        #     feature_type = c(rep("kept", features_below), rep("filtered", features_above))
+        #     plot_data = as.data.frame(table(feature_type))
+        #     
+        #     p = ggplot2::ggplot(data = plot_data, ggplot2::aes(x = feature_type, y = Freq, fill = feature_type)) + ggplot2::geom_bar(stat = "identity", 
+        #         position = "dodge", width = 0.5) + ggplot2::ggtitle(paste("Features Filtered (", pval_threshold, " p-value threshold)", 
+        #         sep = "")) + ggplot2::xlab("data source") + ggplot2::ylab("Number of Features") + ggplot2::geom_text(aes(label = Freq), 
+        #         vjust = -0.3, color = "black", size = 3.5)
+        # } else if (n_sources > 1) {
             # extract and reorganize data from uniFilt_results
             data = mapply(function(x, pval_thresh) {
                 features_below = length(which(x$p_value < pval_thresh))
@@ -108,21 +108,21 @@ plot.uniFiltRes <- function(uniFilt_results, pval_threshold = NULL) {
             plot_data = data.frame(data_source = source_name, filtered = filtered, kept = kept, pval_thresh = thresh)
             
             # melting plot data
-            melt_data = melt(plot_data, id.vars = c("data_source", "pval_thresh"))
+            melt_data = reshape2::melt(plot_data, id.vars = c("data_source", "pval_thresh"))
             
             p = ggplot2::ggplot(data = melt_data, ggplot2::aes(x = data_source, y = value, fill = variable)) + ggplot2::geom_bar(stat = "identity", 
                 position = "dodge", width = 0.5) + ggplot2::ggtitle("Features Filtered") + ggplot2::xlab("data source") + ggplot2::ylab("Number of Features") + 
                 ggplot2::geom_text(aes(label = value), position = position_dodge(width = 0.5), vjust = -0.3, color = "black", size = 3.5) + 
                 ggplot2::scale_x_discrete(labels = paste(source_name, pval_threshold, sep = "\n"))
             
-        }
+        #}
     } else if (is.null(pval_threshold)) {
-        if (n_sources == 1) {
-            data = as.data.frame(uniFilt_results)
-            
-            p = ggplot2::ggplot(data, aes(x = p_value)) + ggplot2::geom_histogram(color = "black", fill = "orange") + theme_bw() + 
-                ggplot2::ggtitle("P value Distribution")
-        } else if (n_sources > 1) {
+        # if (n_sources == 1) {
+        #     data = as.data.frame(uniFilt_results)
+        #     
+        #     p = ggplot2::ggplot(data, aes(x = p_value)) + ggplot2::geom_histogram(color = "black", fill = "orange") + theme_bw() + 
+        #         ggplot2::ggtitle("P value Distribution")
+        # } else if (n_sources > 1) {
             source_names = names(uniFilt_results)
             data = lapply(uniFilt_results, function(x) {
                 p_value = x$p_value
@@ -141,7 +141,7 @@ plot.uniFiltRes <- function(uniFilt_results, pval_threshold = NULL) {
             p = ggplot2::ggplot(df, aes(x = p_value)) + ggplot2::geom_histogram(color = "black", fill = "orange") + ggplot2::facet_wrap(~data_source) + 
                 ggplot2::theme_bw() + ggplot2::ggtitle("P value Distribution (by data source)")
             
-        }
+        #}
     }
     
     return(p)

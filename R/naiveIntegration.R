@@ -15,7 +15,7 @@
 #'@export
 #'
 naiveIntegration <- function(probabilities_by_source){
-  if (length(output_probabilities) == 1){
+  if (length(probabilities_by_source) == 1){
     stop("One source detected. Nothing to integrate.")
   }
   nobs <- lapply(probabilities_by_source, nrow)

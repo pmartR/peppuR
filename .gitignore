@@ -32,3 +32,5 @@ rsconnect/
 .travis.yml
 peppuR.Rproj
 .Rbuildignore
+doc
+Meta

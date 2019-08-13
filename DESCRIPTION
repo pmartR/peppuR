@@ -12,7 +12,8 @@ LazyData: true
 Suggests: 
     testthat,
     knitr,
-    rmarkdown
+    rmarkdown,
+    covr
 RoxygenNote: 6.1.1
 Imports: 
     purrr,
@@ -26,5 +27,6 @@ Imports:
     missForest,
     ModelMetrics,
     AUC,
-    mice
+    mice,
+    reshape2
 VignetteBuilder: knitr
