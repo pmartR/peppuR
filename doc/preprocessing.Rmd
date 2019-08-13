@@ -1,0 +1,29 @@
+---
+title: "Preprocessing"
+author: "Sarah M. Reehl"
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Vignette Title}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+After creating an `as.MLinput()` object, the next phase in the peppuR pipeline involves common preprocessing steps such as:
+
+1. Handling missing values
+2. Correlation filtering
+3. Near-zero variance filtering
+4. Univariate feature selection
+
+Since we have no missing data, we'll proceed into correlation filtering which utilizes Max Kuhn's `caret` package. In general we use a correlation matrix based approach with the peppuR function `univariate_feature_selection()`
+```{r}
+#single_source_peppuRobj <- univariate_feature_selection(single_source_peppuRobj)
+```
