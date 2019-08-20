@@ -124,7 +124,8 @@ peppuR_nb <- function(X, data, pair_cname, outcome_cname, sample_cname, ...) {
     nb_fit <- naivebayes::naive_bayes(x = X, y = as.factor(data[[outcome_cname]]))
   }else{
     # BS comment 5/29: very rough fix for now to drop "ID" column
-    nb_fit <- naivebayes::naive_bayes(x = X, y = data[[outcome_cname]])
+    # BS comment 8/20: nb this version of nb requires factor response
+    nb_fit <- naivebayes::naive_bayes(x = X, y = as.factor(data[[outcome_cname]]))
   }
   return(nb_fit)
 }

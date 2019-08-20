@@ -147,10 +147,11 @@ rofi <- function(MLinput, source_alg_pairs, nn = 1, f_prob=0.1 , nu=1/100,
       #Xdata_i <- Xdata[,which(fvecip1==1)] #Only keep the randomly selected features (columns of Xdata)
       included_features <- feature_map$Feature[which(fvecip1==1)]
       subsetted_data <- MLinput
-        subsetted_data$X <- lapply(subsetted_data$X, function(d_source){
-          d_source <- d_source[ ,which(colnames(d_source) %in% c(included_features, sample_cname)), drop=FALSE] # TODO:Features could be named the same across sources, account for this later
-          return(d_source)
-        })
+      
+      subsetted_data$X <- lapply(subsetted_data$X, function(d_source){
+        d_source <- d_source[ ,which(colnames(d_source) %in% c(included_features, sample_cname)), drop=FALSE] # TODO:Features could be named the same across sources, account for this later
+        return(d_source)
+      })
       # all_res <- run_all(Xdf = Xdata_i, Ydf = Ydata, parts = partitions, sa_pairs = source_alg_pairs, previous_run = all_res$allOut, to_update=flipped)
       # aucip1 <- all_res$AUC
       # 
@@ -197,9 +198,7 @@ rofi <- function(MLinput, source_alg_pairs, nn = 1, f_prob=0.1 , nu=1/100,
         #print("Yes!")
         aucchecks <- c(aucchecks,auci)
         #print(aucchecks)
-      }
-      
-      if(iter%%dynamic_check==0){
+
         all_auc_diff <- diff(aucchecks)
         auc_diff <- abs(all_auc_diff[length(all_auc_diff)])
         if(auc_diff < epsilon){
