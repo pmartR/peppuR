@@ -22,7 +22,7 @@ MLwrapper = function(data_object, methods, scale_and_center = FALSE, single_sour
   optns <- c("svm", "rf", "nb", "knn", "lda")
   
   if (!(all(methods %in% optns))) 
-    stop(paste("Provided 'method' argument is invalid, please select from", c(optns), "."))
+    stop(paste("Provided 'method' argument is invalid, please select from:", toString(optns)))
   
   # check that partition_info attr is present in data_object
   if (is.null(attr(data_object, "partition_info"))) 
