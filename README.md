@@ -16,5 +16,5 @@ devtools::install_github("pmartR/peppuR")
 ## Usage
 Get started by following along with the intro vignette:
 ```r
-vignette("single-spurce-pipeline", package = "peppuR")
+vignette("single-source-pipeline", package = "peppuR")
 ```
