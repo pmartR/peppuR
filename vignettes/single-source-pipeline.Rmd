@@ -10,7 +10,7 @@ vignette: >
 ---
 
 ```{r, echo = FALSE, message = FALSE}
-knitr::opts_chunk$set(collapse = T, comment = "#>")
+knitr::opts_chunk$set(collapse = T, comment = "#>", tidy.opts = list(width.cutoff = 70))
 options(tibble.print_min = 4L, tibble.print_max = 4L)
 library(peppuR)
 library(ggplot2)
@@ -42,7 +42,7 @@ When we talk about a single data source, we mean the data naturally divide into 
 
 The ingestion step of peppuR utilizes an `as.MLinput()` input function to organize the data into outcome and covariates. A few important notes about putting data into peppuR:
 
-* The must be a named sample identifier column. If there are multiple sources, this column must have the same name across sources
+* There must be a named sample identifier column `sample_cname`. If there are multiple sources, this column must have the same name across sources
 * Categorical features must appear as factors in the data
 * All non-covariates must either be separated into a data.frame and passed as `Y` or specified by name in `meta-colnames`.
 
@@ -74,7 +74,7 @@ Notice that we're slightly luck here in that there are no missing data. We'll lo
 
 #### Machine Learning
 
-Without the need for preprcoessing, the next logical step in a machine learning pipeline is to create cross-validation folds. Again utilizing the `caret` package, the `dataPationing` function will add an attribute to the data object that separates the data into cross validation folds. In the case where there are not enough data to have a true test set, we allow the option for repeated cross-validation with the `repeats` argument.
+Without the need for preprocessing, the next logical step in a machine learning pipeline is to create cross-validation folds. Again utilizing the `caret` package, the `dataPationing` function will add an attribute to the data object that separates the data into cross validation folds. In the case where there are not enough data to have a true test set, we allow the option for repeated cross-validation with the `repeats` argument.
 
 ```{r}
 single_source_peppuRobj <- dataPartitioning(single_source_peppuRobj, folds = 5, repeats = 10)
@@ -91,9 +91,9 @@ output_probabilities <- attr(rf_results, "ML_results")
 
 The output of the MLwrapper adds attributes to the data object. The most important of the attributes is the `ML_results` which contains a sample-wise class probability for each observation in our validation fold. 
 
-```{r, echo=FALSE}
+```{r, echo=FALSE, tidy.opts=list(width.cutoff=50)}
 
-knitr::kable(data.frame(output_probabilities)[1:10,], row.names = FALSE)
+knitr::kable(data.frame(output_probabilities)[1:10,], row.names = FALSE, align = 'l')
 ```
 
 We can look at receiver operating characteristics (ROC) with a ROC curve:
@@ -114,17 +114,17 @@ plot(rf_results)[[1]]+ggtitle("Random Forest ROC")
 
 #### Ensemble Feature Selection
 
-```{r, cache=TRUE}
+```{r, cache=FALSE}
 #-----ROFI------#
-source_alg_pairs <- "rf"
-names(source_alg_pairs) <- "DS_1"
-rofi_results <- rofi(single_source_peppuRobj, source_alg_pairs, nn = 5, f_prob=0.4 ,
-                     nu=1/100, conv_check = 40,max_iter=50,epsilon = 0.01, after_conv_checks = 5)
+#source_alg_pairs <- "rf"
+#names(source_alg_pairs) <- "DS_1"
+#rofi_results <- rofi(single_source_peppuRobj, source_alg_pairs, nn = 5, f_prob=0.4 ,
+#                     nu=1/100, conv_check = 50,max_iter=55,epsilon = 0.01, after_conv_checks =2)
 ```
 
 ```{r}
 #source("../R/plot_rofi.R")
 #plot.rofi(rofi_results)
-peppuR::plot.rofi(rofi_results)
+#peppuR::plot.rofi(rofi_results)
 ```
 
