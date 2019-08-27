@@ -116,15 +116,15 @@ plot(rf_results)[[1]]+ggtitle("Random Forest ROC")
 
 ```{r, cache=FALSE}
 #-----ROFI------#
-#source_alg_pairs <- "rf"
-#names(source_alg_pairs) <- "DS_1"
-#rofi_results <- rofi(single_source_peppuRobj, source_alg_pairs, nn = 5, f_prob=0.4 ,
-#                     nu=1/100, conv_check = 50,max_iter=55,epsilon = 0.01, after_conv_checks =2)
+source_alg_pairs <- "rf"
+names(source_alg_pairs) <- "DS_1"
+rofi_results <- rofi(single_source_peppuRobj, source_alg_pairs, nn = 5, f_prob=0.4 ,
+                    nu=1/100, max_iter = 35)
 ```
 
 ```{r}
 #source("../R/plot_rofi.R")
 #plot.rofi(rofi_results)
-#peppuR::plot.rofi(rofi_results)
+plot(rofi_results)
 ```
 

@@ -48,23 +48,22 @@ plot.MLinput <- function(MLinput_object, order_plot = TRUE, ...) {
   warning("Data plotting not yet implemented")
 }
 
-#' plot.rofi
+#' plot.featSelect
 #' Plots an object of class featSelect
 #' 
 #' For plotting an S3 object of type 'featSelect'
-#' @rdname plot-peppuR-rofi
-#' @export
+#' @rdname plot-peppuR-featSelect
 #' @param featSelect_object an object of the class 'featSelect'
 #' @param order_plot logical indicator for plotting order plots
 #' @return plots ggplot2 object
-
-plot.rofi <- function(featSelect_object, order_plot = TRUE, ...) {
+#' @export
+plot.featSelect <- function(featSelect_object, order_plot = TRUE, ...) {
   require(ggplot2)
   require(gridExtra)
   .plot.rofi(featSelect_object, order_plot = TRUE, ...)
 }
 
-.plot.rofi <- function(featSelect_object, order_plot = TRUE, x_lab = NULL, y_lab = NULL, plot_title = NULL, title_size = 14, x_lab_size = 11, y_lab_size = 11, bw_theme = FALSE) {
+.plot.featSelect <- function(featSelect_object, order_plot = TRUE, x_lab = NULL, y_lab = NULL, plot_title = NULL, title_size = 14, x_lab_size = 11, y_lab_size = 11, bw_theme = FALSE) {
   # check for a corRes object #
   if(!inherits(featSelect_object, "featSelect")) stop("object must be of class featSelect'")
   # check title and colorbar options #
