@@ -60,7 +60,7 @@ plot.MLinput <- function(MLinput_object, order_plot = TRUE, ...) {
 plot.featSelect <- function(featSelect_object, order_plot = TRUE, ...) {
   require(ggplot2)
   require(gridExtra)
-  .plot.rofi(featSelect_object, order_plot = TRUE, ...)
+  .plot.featSelect(featSelect_object, order_plot = TRUE, ...)
 }
 
 .plot.featSelect <- function(featSelect_object, order_plot = TRUE, x_lab = NULL, y_lab = NULL, plot_title = NULL, title_size = 14, x_lab_size = 11, y_lab_size = 11, bw_theme = FALSE) {
