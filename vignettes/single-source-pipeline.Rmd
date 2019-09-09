@@ -9,11 +9,13 @@ vignette: >
 
 ---
 
-```{r, echo = FALSE, message = FALSE}
+```{r setup, echo = FALSE, message = FALSE}
 knitr::opts_chunk$set(collapse = T, comment = "#>", tidy.opts = list(width.cutoff = 70))
 options(tibble.print_min = 4L, tibble.print_max = 4L)
 library(peppuR)
 library(ggplot2)
+library(dplyr)
+library(kableExtra)
 set.seed(1014)
 ```
 
@@ -27,7 +29,7 @@ Predictive analysis of biological data genearlly requires a processing pipline t
 
 We will utilize the `MASS::birthwt` dataset for a lightweight example. The data consit of 189 rows corresponding to 189 individuals. Each of the 10 columns include information about a subject's maternal factors and birth conditions. The first column in the dataset, `low`, is a binary indicator of a birth weight less than 2.5 kg and is the outcome we would like to predict using the remaining 9 columns. For more information about the dataset, use `?MASS::birthwt`. 
 
-```{r}
+```{r data}
 library(MASS)
 dim(birthwt)
 head(birthwt)
@@ -47,7 +49,7 @@ The ingestion step of peppuR utilizes an `as.MLinput()` input function to organi
 * All non-covariates must either be separated into a data.frame and passed as `Y` or specified by name in `meta-colnames`.
 
 
-```{r}
+```{r process}
 # Add subject names to the data
 birthweight_data <- birthwt
 birthweight_data$ID <- paste("ID",1:nrow(birthweight_data), sep = "_")
@@ -66,7 +68,7 @@ single_source_peppuRobj <- as.MLinput(X = birthweight_data, Y = NULL,
 
 The result of `as.MLinput()` is both a list and an `MLinput` object with special properties, like the following attributes:
 
-```{r}
+```{r view_data}
 attributes(single_source_peppuRobj)
 ```
 
@@ -76,14 +78,14 @@ Notice that we're slightly luck here in that there are no missing data. We'll lo
 
 Without the need for preprocessing, the next logical step in a machine learning pipeline is to create cross-validation folds. Again utilizing the `caret` package, the `dataPationing` function will add an attribute to the data object that separates the data into cross validation folds. In the case where there are not enough data to have a true test set, we allow the option for repeated cross-validation with the `repeats` argument.
 
-```{r}
+```{r partition}
 single_source_peppuRobj <- dataPartitioning(single_source_peppuRobj, folds = 5, repeats = 10)
 ```
 
 After the data are partioned, a single machine learning algorithm can be trained and evaluated on the partitions with the `MLWrapper`. Below we show how to train a Random Forest using the 5-fold cross validation we created in the previous step, repeated 10 times.
 
 
-```{r}
+```{r leearn}
 rf_results <- MLwrapper(data_object = single_source_peppuRobj, methods = "rf")
 #----Take a look at the results ------#
 output_probabilities <- attr(rf_results, "ML_results")
@@ -91,40 +93,35 @@ output_probabilities <- attr(rf_results, "ML_results")
 
 The output of the MLwrapper adds attributes to the data object. The most important of the attributes is the `ML_results` which contains a sample-wise class probability for each observation in our validation fold. 
 
-```{r, echo=FALSE, tidy.opts=list(width.cutoff=50)}
-
-knitr::kable(data.frame(output_probabilities)[1:10,], row.names = FALSE, align = 'l')
+```{r view_results, echo=FALSE, tidy.opts=list(width.cutoff=50)}
+temp <- data.frame(output_probabilities)[1:10,1:5]
+colnames(temp) <- gsub(pattern= '1\\.rf', replacement = '1\nrf', x = colnames(temp))
+knitr::kable(temp, row.names = FALSE, align = 'l', booktabs = TRUE) %>%
+  kableExtra::column_spec(column = c(1:5), width = '7cm')
 ```
 
-We can look at receiver operating characteristics (ROC) with a ROC curve:
-```{r}
-library(ggplot2)
-#plot(rf_results, roc = TRUE)
-# 
-# temp <- AUC::roc(output_probabilities$source1.rf$PredictedProbs.1, labels = output_probabilities$source1.rf$Truth)
-# 
-# ggplot(data.frame(fpr = temp$fpr, tpr = temp$tpr), aes(x = fpr, y = tpr))+
-#   geom_line(color = "blue")+
-#   theme_bw()+
-#   ggtitle("Random Forest ROC")
+We can look at receiver operating characteristics (ROC) curve with the plotting method for any `MLWrapper()` object. These methods are built using `ggplot2` and can accept styling layers such as the title addition shown below.
 
+```{r plot_results}
+library(ggplot2)
 plot(rf_results)[[1]]+ggtitle("Random Forest ROC")
 
 ```
 
 #### Ensemble Feature Selection
+peppuR utilizes a Repeated Optimization for Feature Interpretation (ROFI) method described in Webb-Roberston et al 2016 to identify feature importance from single- or multi-data source machine learning. The `rofi()` function takes in a data object created with `as.MLinput` and a named vector of the machine learning algorithm/s, one of "rf", "lda", "svm", "nb", or "knn" and plural for multiple sources only, where the name of the vector is also the name of the data source as shown below. For details on the other parameters use `?rofi`.
 
-```{r, cache=FALSE}
+```{r rofi, cache=TRUE}
 #-----ROFI------#
 source_alg_pairs <- "rf"
 names(source_alg_pairs) <- "DS_1"
-rofi_results <- rofi(single_source_peppuRobj, source_alg_pairs, nn = 5, f_prob=0.4 ,
+rofi_results <- rofi(single_source_peppuRobj, source_alg_pairs, nn = 5, f_prob=0.4,
                     nu=1/100, max_iter = 35)
 ```
 
-```{r}
-#source("../R/plot_rofi.R")
-#plot.rofi(rofi_results)
+The output of rofi is a list of 1) feature importance metrics by iteration and 2) machine learning performance by iteration. This output also has a plotting method that produces and order plot as shown below.
+
+```{r plot_rofi}
 plot(rofi_results)
 ```
 
