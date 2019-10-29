@@ -52,7 +52,7 @@ rofi <- function(MLinput, source_alg_pairs, nn = 1, f_prob=0.1 , nu=1/100,
   results <- vector("list", nn)
   
   for(i in 1:nn){
-    aucchecks <- NULL
+    aucchecks <- 0
 
     #Create elements in results list
     results[[i]] <- vector("list",4)
