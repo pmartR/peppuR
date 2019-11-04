@@ -7,12 +7,13 @@
 <meta charset="utf-8" />
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 <meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
 
 <meta name="viewport" content="width=device-width, initial-scale=1">
 
 <meta name="author" content="Sarah M. Reehl" />
 
-<meta name="date" content="2019-08-12" />
+<meta name="date" content="2019-10-07" />
 
 <title>Preprocessing</title>
 
@@ -96,7 +97,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
       if (rule.type !== rule.STYLE_RULE || rule.selectorText !== "div.sourceCode") continue;
       var style = rule.style.cssText;
       // check if color or background-color is set
-      if (rule.style.color === '' || rule.style.backgroundColor === '') continue;
+      if (rule.style.color === '' && rule.style.backgroundColor === '') continue;
       // replace div.sourceCode by a pre.sourceCode rule
       sheets[i].deleteRule(j);
       sheets[i].insertRule('pre.sourceCode{' + style + '}', j);
@@ -303,7 +304,7 @@ code > span.fu { color: #900; font-weight: bold; }  code > span.er { color: #a61
 
 <h1 class="title toc-ignore">Preprocessing</h1>
 <h4 class="author">Sarah M. Reehl</h4>
-<h4 class="date">2019-08-12</h4>
+<h4 class="date">2019-10-07</h4>
 
 
 
@@ -315,8 +316,30 @@ code > span.fu { color: #900; font-weight: bold; }  code > span.er { color: #a61
 <li>Univariate feature selection</li>
 </ol>
 <p>Since we have no missing data, we’ll proceed into correlation filtering which utilizes Max Kuhn’s <code>caret</code> package. In general we use a correlation matrix based approach with the peppuR function <code>univariate_feature_selection()</code></p>
-<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb1-1" data-line-number="1"><span class="co">#single_source_peppuRobj &lt;- univariate_feature_selection(single_source_peppuRobj)</span></a></code></pre></div>
+<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb1-1" data-line-number="1"><span class="kw">library</span>(peppuR)</a>
+<a class="sourceLine" id="cb1-2" data-line-number="2"><span class="kw">data</span>(<span class="st">&quot;single_source&quot;</span>)</a>
+<a class="sourceLine" id="cb1-3" data-line-number="3">single_source_peppuRobj &lt;-<span class="st"> </span><span class="kw">univariate_feature_selection</span>(single_source)</a>
+<a class="sourceLine" id="cb1-4" data-line-number="4"><span class="co">#&gt; boundary (singular) fit: see ?isSingular</span></a>
+<a class="sourceLine" id="cb1-5" data-line-number="5"><span class="co">#&gt; boundary (singular) fit: see ?isSingular</span></a>
+<a class="sourceLine" id="cb1-6" data-line-number="6"><span class="co">#&gt; boundary (singular) fit: see ?isSingular</span></a>
+<a class="sourceLine" id="cb1-7" data-line-number="7"><span class="co">#&gt; boundary (singular) fit: see ?isSingular</span></a>
+<a class="sourceLine" id="cb1-8" data-line-number="8"><span class="co">#&gt; boundary (singular) fit: see ?isSingular</span></a>
+<a class="sourceLine" id="cb1-9" data-line-number="9"><span class="co">#&gt; boundary (singular) fit: see ?isSingular</span></a>
+<a class="sourceLine" id="cb1-10" data-line-number="10"><span class="co">#&gt; boundary (singular) fit: see ?isSingular</span></a>
+<a class="sourceLine" id="cb1-11" data-line-number="11"><span class="co">#&gt; boundary (singular) fit: see ?isSingular</span></a>
+<a class="sourceLine" id="cb1-12" data-line-number="12"><span class="co">#&gt; boundary (singular) fit: see ?isSingular</span></a>
+<a class="sourceLine" id="cb1-13" data-line-number="13"><span class="co">#&gt; boundary (singular) fit: see ?isSingular</span></a>
+<a class="sourceLine" id="cb1-14" data-line-number="14"><span class="co">#&gt; boundary (singular) fit: see ?isSingular</span></a>
+<a class="sourceLine" id="cb1-15" data-line-number="15"><span class="co">#&gt; boundary (singular) fit: see ?isSingular</span></a>
+<a class="sourceLine" id="cb1-16" data-line-number="16"><span class="co">#&gt; boundary (singular) fit: see ?isSingular</span></a>
+<a class="sourceLine" id="cb1-17" data-line-number="17"><span class="co">#&gt; boundary (singular) fit: see ?isSingular</span></a>
+<a class="sourceLine" id="cb1-18" data-line-number="18"><span class="co">#&gt; boundary (singular) fit: see ?isSingular</span></a>
+<a class="sourceLine" id="cb1-19" data-line-number="19"><span class="co">#&gt; boundary (singular) fit: see ?isSingular</span></a>
+<a class="sourceLine" id="cb1-20" data-line-number="20"><span class="co">#&gt; boundary (singular) fit: see ?isSingular</span></a></code></pre></div>
 
+
+
+<!-- code folding -->
 
 
 <!-- dynamically load mathjax for compatibility with self-contained -->

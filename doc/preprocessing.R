@@ -5,5 +5,7 @@ knitr::opts_chunk$set(
 )
 
 ## ------------------------------------------------------------------------
-#single_source_peppuRobj <- univariate_feature_selection(single_source_peppuRobj)
+library(peppuR)
+data("single_source")
+single_source_peppuRobj <- univariate_feature_selection(single_source)
 

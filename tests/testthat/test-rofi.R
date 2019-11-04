@@ -33,8 +33,7 @@ test_that("errors if conditions aren't met", {
 
 data_obj <- dataPartitioning(data_obj)
 rofi_results <- rofi(data_obj, source_alg_pairs, nn = 1, f_prob=0.70 ,
-                     nu=1/100, max_iter=110,
-                     conv_check=100, epsilon = 0.01, after_conv_checks = 10)
+                     nu=1/100, epsilon = 0.01, after_conv_checks = 10)
 
 test_that("rofi works", {
   expect_s3_class(rofi_results, "featSelect")

@@ -25,5 +25,7 @@ After creating an `as.MLinput()` object, the next phase in the peppuR pipeline i
 
 Since we have no missing data, we'll proceed into correlation filtering which utilizes Max Kuhn's `caret` package. In general we use a correlation matrix based approach with the peppuR function `univariate_feature_selection()`
 ```{r}
-#single_source_peppuRobj <- univariate_feature_selection(single_source_peppuRobj)
+library(peppuR)
+data("single_source")
+single_source_peppuRobj <- univariate_feature_selection(single_source)
 ```
