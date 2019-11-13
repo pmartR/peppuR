@@ -90,7 +90,7 @@ as.MLinput <- function(X, Y, meta_colnames = NULL, categorical_features = FALSE,
         
         # make Y a data frame arranged by sample name
         Y <- raw_Y %>% 
-          purrr::reduce(dplyr::left_join, by = sample_cname)
+          purrr::reduce(dplyr::left_join)
         # X <- lapply(X, function(d_source){
         #   subX <- d_source[which(d_source[,sample_cname] %in% Y[,sample_cname]), ]
         #   newX <- build_x_mat(subX)
@@ -100,7 +100,6 @@ as.MLinput <- function(X, Y, meta_colnames = NULL, categorical_features = FALSE,
       }
     }
   }
-  
   #----- if X is a data frame, turn it to a list --------#
   if (inherits(X, "data.frame")) {
     temp <- vector("list")
