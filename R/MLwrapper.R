@@ -19,7 +19,7 @@ require(MASS)
 #' @export
 MLwrapper = function(data_object, methods, scale_and_center = FALSE, single_source = NULL) {
   # match 'method' argument with available options
-  optns <- c("svm", "rf", "nb", "knn", "lda")
+  optns <- c("svm", "rf", "nb", "knn", "lda", "lr")
   
   if (!(all(methods %in% optns))) 
     stop(paste("Provided 'method' argument is invalid, please select from:", toString(optns)))
@@ -142,8 +142,7 @@ MLwrapper_helper = function(method, X, data, partition_info, scale_and_center, o
   }
   
   # switch statement
-  ml_method <- switch(method, svm = peppuR_svm, rf = peppuR_rf, nb = peppuR_nb, knn = peppuR_knn, lda = peppuR_lda)
-  
+  ml_method <- switch(method, svm = peppuR_svm, rf = peppuR_rf, nb = peppuR_nb, knn = peppuR_knn, lda = peppuR_lda, lr = peppuR_lr)
   # if knn, the model is memoryless and can't be stored
   pred_labels <- mapply(function(train, test) {
     train_partition = train$Train
@@ -159,6 +158,7 @@ MLwrapper_helper = function(method, X, data, partition_info, scale_and_center, o
     start <- Sys.time()
     # If the model is knn, treat it differently
     if(tolower(method) == "knn") { 
+      browser()
       model <- "memoryless"
       # figure out the best way to scale and center the data
       X_train <- scale(X[train_partition, ], scale = TRUE, center = TRUE)
@@ -213,7 +213,13 @@ MLwrapper_helper = function(method, X, data, partition_info, scale_and_center, o
         colnames(pred_prob) <- c("0", "1")
       } else if(method=="nb"){
         pred_prob <- predict(model, newdata = X[test_partition, , drop = FALSE],type = "prob")
-      }else{
+      } else if (method == "lr"){
+        pred_prob <- predict(model, newdata = X[test_partition, , drop = FALSE], type = "response")
+        odds <- exp(pred_prob)
+        probs <- odds / (1 + odds)
+        pred_prob <- data.frame(1 - probs, probs)
+        colnames(pred_prob) <- c("0", "1")
+        } else{
         pred_prob <- predict(model, newdata = X[test_partition, , drop = FALSE])
       }
     }
