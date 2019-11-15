@@ -1,5 +1,5 @@
 context("as.MLinput Multisource")
-library(peppuR)
+#library(peppuR)
 data("multi_source")
 
 x_multi = multi_source$X

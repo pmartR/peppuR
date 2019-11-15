@@ -1,5 +1,5 @@
 context("MLWrapperSingleSource")
-library(peppuR)
+#library(peppuR)
 library(MASS)
 
 birthweight_data <- birthwt

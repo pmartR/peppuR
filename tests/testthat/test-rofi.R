@@ -1,5 +1,5 @@
 context("rofi")
-library(peppuR)
+#library(peppuR)
 library(kernlab)
 data("multi_source")
 

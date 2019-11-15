@@ -1,5 +1,5 @@
 context("applyCorrelationFiltering")
-library(peppuR)
+#library(peppuR)
 
 #------ Single Source -------#
 # Add subject names to the data

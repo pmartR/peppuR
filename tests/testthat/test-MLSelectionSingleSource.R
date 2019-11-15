@@ -1,4 +1,4 @@
-library(peppuR)
+#library(peppuR)
 library(MASS)
 library(kernlab)
 #------ Single Source -------#
