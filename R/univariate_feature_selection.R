@@ -53,9 +53,7 @@ univariate_feature_selection = function(data_object){
   # }
   #case where x is a list of data frames
   #else if(n_sources > 1){
-  if(length(categorical_cols) == 0) {
-    categorical_cols = "none"
-  }
+
       x_result = mapply(test_helper, x, categorical_cols,
                         MoreArgs = list(y, sample_cname, pair_cname,
                                         outcome_cname), USE.NAMES = T)
@@ -79,8 +77,7 @@ test_helper = function(x_mat, categorical_cols, y_mat, sample_cname, pair_cname,
   bound_data = merge(x_mat, y_mat, by = sample_cname)
   #first, check if pair_cname is NULL or non-NULL
   if(is.null(pair_cname)){
-    
-    if(categorical_cols == "none"){
+    if(all(lengths(categorical_cols) == 0)) {
       #remove sample_cname col form bound_data
       samp_ind = which(names(bound_data) == sample_cname)
       bound_data = bound_data[, -samp_ind] 
@@ -130,7 +127,7 @@ test_helper = function(x_mat, categorical_cols, y_mat, sample_cname, pair_cname,
   }else{
     #case where pair is non NULL
     
-    if(categorical_cols == "none"){
+    if(all(lengths(categorical_cols) == 0)) {
       #remove sample_cname col form bound_data
       samp_ind = which(names(bound_data) == sample_cname)
       bound_data = bound_data[, -samp_ind] 
