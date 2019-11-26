@@ -22,7 +22,7 @@ require(dplyr)
 rofi <- function(MLinput, source_alg_pairs, nn = 1, f_prob=0.1 , nu=1/100,
                  max_iter=2*sum(attr(MLinput, "data_info")$number_of_features), 
                  conv_check=(sum(attr(MLinput, "data_info")$number_of_features)+1),
-                 epsilon = 0.01, after_conv_checks = 100){
+                 epsilon = 0.01, after_conv_checks = 100, verbose=FALSE){
   
   #--- Initialization ----#
   sample_cname <- attr(MLinput, "cnames")$sample_cname
@@ -46,13 +46,16 @@ rofi <- function(MLinput, source_alg_pairs, nn = 1, f_prob=0.1 , nu=1/100,
   }
   
   # How often the AUC is recorded for convergence purposes
+  if (after_conv_checks > conv_check) {
+    stop("after_conv_checks should be smaller than conv_checks")
+  }
   benchmark_auc <- after_conv_checks
   
   # Results list
   results <- vector("list", nn)
   
   for(i in 1:nn){
-    aucchecks <- 0
+    aucchecks <- NULL
 
     #Create elements in results list
     results[[i]] <- vector("list",4)
@@ -168,13 +171,13 @@ rofi <- function(MLinput, source_alg_pairs, nn = 1, f_prob=0.1 , nu=1/100,
       #Step d - compute acceptance prob and flip coin
       # i - acceptance prob
       theta <- min(1,exp((aucip1-auci)/nu))
-      #if(verbose){
-      #  cat("Iter: ",i,"-",iter,"\n")
-      #  cat("AUC diff: ",aucip1-auci,"\n")
-      #  cat("Current AUC: ",aucip1,"\n")
-      #  cat("Acceptance prob: ",theta,"\n")
-      #  cat("-----------------\n")
-      #}
+      if(verbose){
+        cat("Iter: ",i,"-",iter,"\n")
+        cat("AUC diff: ",aucip1-auci,"\n")
+        cat("Current AUC: ",aucip1,"\n")
+        cat("Acceptance prob: ",theta,"\n")
+        cat("-----------------\n")
+      }
       results[[i]]$AllAUC[iter] <- aucip1 #Save current AUC to AllAUC
       
       # ii - accept/reject decision decision
@@ -195,10 +198,11 @@ rofi <- function(MLinput, source_alg_pairs, nn = 1, f_prob=0.1 , nu=1/100,
       }
       #Record the AUC every "benchmark_auc" iterations
       if(iter%%benchmark_auc==0){
-        #print("Yes!")
+       # print("Yes!")
         aucchecks <- c(aucchecks,auci)
         #print(aucchecks)
-
+      }
+      if(iter%%dynamic_check==0){
         all_auc_diff <- diff(aucchecks)
         auc_diff <- abs(all_auc_diff[length(all_auc_diff)])
         if(auc_diff < epsilon){
