@@ -41,7 +41,7 @@ multi_results <- suppressMessages(as.MLinput(X=x_multi, Y = y_multi, categorical
                                        sample_cname = sample_cname, outcome_cname = outcome_cname,
                                        pair_cname = pair_cname))
 
-multi_ufs_result = univariate_feature_selection(multi_results)
+multi_ufs_result = suppressMessages(univariate_feature_selection(multi_results))
 
 #using applyFeatureSelection function
 apply_multi_fs = applyFeatureSelection(multi_results, multi_ufs_result, pval_threshold = rep(.2, length(multi_results$X)))
