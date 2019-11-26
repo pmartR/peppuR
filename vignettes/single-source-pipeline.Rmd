@@ -116,7 +116,7 @@ peppuR utilizes a Repeated Optimization for Feature Interpretation (ROFI) method
 source_alg_pairs <- "rf"
 names(source_alg_pairs) <- "DS_1"
 rofi_results <- rofi(single_source_peppuRobj, source_alg_pairs, nn = 5, f_prob=0.4,
-                    nu=1/100, max_iter = 35)
+                    nu=1/100, max_iter = 35, after_conv_checks = 5)
 ```
 
 The output of rofi is a list of 1) feature importance metrics by iteration and 2) machine learning performance by iteration. This output also has a plotting method that produces and order plot as shown below.
