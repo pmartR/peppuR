@@ -128,7 +128,7 @@ as.MLinput <- function(X, Y, meta_colnames = NULL, categorical_features = FALSE,
     }))
     # if there are no categorical features...
     if(all(categorical_sum == 0)){ #...and there should be, error out
-      cat_cols <- NULL
+      cat_cols <- "none"
       if (categorical_features) stop("No categorical features detected. Change categorical_features to FALSE or change categorical columns to factors")
       # if there are categorical features...
     } else if (any(categorical_sum >= 1)) {
