@@ -5,8 +5,6 @@ require(ranger)
 #' @param data - a data.frame with columns:
 #'           y - n vector of class identifiers for each for of X
 #'          ID - n vector of patient IDs
-#'        pair - vector of pair identifiers
-#'        time - n vector of time point identifiers
 #' @param ... - additional arguements passed to ranger(...)
 #' 
 #' @return the object created by ranger::randomforest
@@ -35,8 +33,6 @@ require(kernlab)
 #' @param data - a data.frame with columns:
 #'           y - n vector of class identifiers for each for of X
 #'          ID - n vector of patient IDs
-#'        pair - vector of pair identifiers
-#'        time - n vector of time point identifiers
 #' @param ... - additional arguements passed to svm(...)
 #' @return the object created by kernlab::svm
 #' @rdname peppuR_svm
@@ -59,8 +55,6 @@ require(MASS)
 #' @param data - a data.frame with columns:
 #'           y - n vector of class identifiers for each for of X
 #'          ID - n vector of patient IDs
-#'        pair - vector of pair identifiers
-#'        time - n vector of time point identifiers
 #' @param ... - additional arguements passed to lda(...)
 #' 
 #' @return the object created by MASS::lda
@@ -142,19 +136,6 @@ require(naivebayes)
 
 peppuR_nb <- function(X, data, outcome_cname, sample_cname, ...) {
   
-  #Remove sample_cname columns from X
-  #X <- X[,-which(colnames(X)==sample_cname)]
-  # if(!is.null(pair_cname)){
-  #   if (length(data[[pair_cname]]) > 0) {
-  #     # If pair information was provided, add it to the data matrix 
-  #     #X <- cbind(X, pair = as.factor(data[[pair_cname]]))
-  #   }
-    # set.seed(42) nb_fit <- naiveBayes(x=X, y=data$y,...)
-    ## BS Comment 5/29: did you mean "pair_cname" here or "outcome_cname"?
-    #nb_fit <- naivebayes::naive_bayes(x = X, y = as.factor(data[[outcome_cname]]))
-  #}else{
-    # BS comment 5/29: very rough fix for now to drop "ID" column
-    # BS comment 8/20: nb this version of nb requires factor response
     nb_fit <- naivebayes::naive_bayes(x = X, y = as.factor(data[[outcome_cname]]))
   #nb_fit <- e1071::naiveBayes(x = X, y = as.factor(data[[outcome_cname]]))
   #}

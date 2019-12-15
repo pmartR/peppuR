@@ -10,10 +10,8 @@ peppuR_lda(X, data, outcome_cname, ...)
 \item{X}{- n-by-p data.frame containing all of the 'covariates' that will be used to predict class of y}
 
 \item{data}{- a data.frame with columns:
-   y - n vector of class identifiers for each for of X
-  ID - n vector of patient IDs
-pair - vector of pair identifiers
-time - n vector of time point identifiers}
+ y - n vector of class identifiers for each for of X
+ID - n vector of patient IDs}
 
 \item{...}{- additional arguements passed to lda(...)}
 }
