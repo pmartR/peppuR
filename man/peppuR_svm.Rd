@@ -15,9 +15,7 @@ peppuR_svm(X, data, outcome_cname, ...)
 pair - vector of pair identifiers
 time - n vector of time point identifiers}
 
-\item{...}{- additional arguements passed to BGLR(...)}
-
-\item{oneclass}{- if pair information is provided, should a one-class SVM be built?}
+\item{...}{- additional arguements passed to svm(...)}
 }
 \value{
 the object created by kernlab::svm

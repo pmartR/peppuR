@@ -15,7 +15,7 @@ peppuR_lda(X, data, outcome_cname, ...)
 pair - vector of pair identifiers
 time - n vector of time point identifiers}
 
-\item{...}{- additional arguements passed to BGLR(...)}
+\item{...}{- additional arguements passed to lda(...)}
 }
 \value{
 the object created by MASS::lda

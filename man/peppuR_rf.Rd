@@ -15,7 +15,7 @@ peppuR_rf(X, data, outcome_cname, ...)
 pair - vector of pair identifiers
 time - n vector of time point identifiers}
 
-\item{...}{- additional arguements passed to BGLR(...)}
+\item{...}{- additional arguements passed to ranger(...)}
 }
 \value{
 the object created by ranger::randomforest

@@ -7,7 +7,7 @@
 rofi(MLinput, source_alg_pairs, nn = 1, f_prob = 0.1, nu = 1/100,
   max_iter = 2 * sum(attr(MLinput, "data_info")$number_of_features),
   conv_check = (sum(attr(MLinput, "data_info")$number_of_features) + 1),
-  epsilon = 0.01, after_conv_checks = 100)
+  epsilon = 0.01, after_conv_checks = 100, verbose = FALSE)
 }
 \arguments{
 \item{MLinput}{an as.MLinput object which contains a single X data frame or a
