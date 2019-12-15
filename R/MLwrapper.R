@@ -158,7 +158,6 @@ MLwrapper_helper = function(method, X, data, partition_info, scale_and_center, o
     start <- Sys.time()
     # If the model is knn, treat it differently
     if(tolower(method) == "knn") { 
-      browser()
       model <- "memoryless"
       # figure out the best way to scale and center the data
       X_train <- scale(X[train_partition, ], scale = TRUE, center = TRUE)
@@ -213,6 +212,12 @@ MLwrapper_helper = function(method, X, data, partition_info, scale_and_center, o
         colnames(pred_prob) <- c("0", "1")
       } else if(method=="nb"){
         pred_prob <- predict(model, newdata = X[test_partition, , drop = FALSE],type = "prob")
+        # if(all(is.nan(pred_prob))){
+        #   #replace this partition
+        #   pred_prob <- predict(model, newdata = X[test_partition, , drop = FALSE],type = "class")
+        #   pred_prob <- cbind(c(1-as.numeric(as.character(pred_prob))), c(as.numeric(as.character(pred_prob))))
+        #   colnames(pred_prob) <- c("0", "1")
+        # }
       } else if (method == "lr"){
         pred_prob <- predict(model, newdata = X[test_partition, , drop = FALSE], type = "response")
         odds <- exp(pred_prob)

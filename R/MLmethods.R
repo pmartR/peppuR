@@ -134,7 +134,7 @@ peppuR_knn <- function(X_train, X_test, train_class, train_partition, test_parti
   return(knn_fit)
 }
 
-# require(e1071)
+#require(e1071)
 require(naivebayes)
 
 #' Naive Bayes method
@@ -165,6 +165,7 @@ peppuR_nb <- function(X, data, outcome_cname, sample_cname, ...) {
     # BS comment 5/29: very rough fix for now to drop "ID" column
     # BS comment 8/20: nb this version of nb requires factor response
     nb_fit <- naivebayes::naive_bayes(x = X, y = as.factor(data[[outcome_cname]]))
+  #nb_fit <- e1071::naiveBayes(x = X, y = as.factor(data[[outcome_cname]]))
   #}
   return(nb_fit)
 }
