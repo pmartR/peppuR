@@ -278,7 +278,7 @@ fvecLearning <- function(featurizedMLinput, source_alg_pairs, previous_run = NUL
           results[[i]] <- lapply(parts, function(x) data.frame(PredicetedProbs.0 = rep(1, length(x$test)),PredicetedProbs.1 = rep(1, length(x$test)),
                                                                PredictedLabel = rep(NA, length(x$test)), Truth = featurizedMLinput$Y[x$test, outcome_cname]))
         }else{
-          results[[i]] <- attr(MLwrapper(data_object = featurizedMLinput, methods = source_alg_pairs[[i]], single_source = unname(s_names[i])), "ML_results")[[source_alg_pairs[[i]]]]
+          results[[i]] <- MLwrapper(data_object = featurizedMLinput, methods = source_alg_pairs[[i]], single_source = unname(s_names[i]))[[source_alg_pairs[[i]]]]
         }
       }
     }

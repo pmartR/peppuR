@@ -88,7 +88,7 @@ After the data are partioned, a single machine learning algorithm can be trained
 ```{r leearn}
 rf_results <- MLwrapper(data_object = single_source_peppuRobj, methods = "rf")
 #----Take a look at the results ------#
-output_probabilities <- attr(rf_results, "ML_results")
+output_probabilities <- rf_results$source1.rf
 ```
 
 The output of the MLwrapper adds attributes to the data object. The most important of the attributes is the `ML_results` which contains a sample-wise class probability for each observation in our validation fold. 
@@ -104,7 +104,7 @@ We can look at receiver operating characteristics (ROC) curve with the plotting 
 
 ```{r plot_results}
 library(ggplot2)
-plot(rf_results)[[1]]+ggtitle("Random Forest ROC")
+plot(rf_results)+ggtitle("Random Forest ROC")
 
 ```
 

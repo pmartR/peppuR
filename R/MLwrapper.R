@@ -30,38 +30,6 @@ MLwrapper = function(data_object, methods, scale_and_center = FALSE, single_sour
   
   # extract number of sources
   n_sources = attr(data_object, "n_sources")
-  
-  # check if single_source is provided then data_object must have more than one data source
-  # if (!is.null(single_source) & n_sources == 1) 
-  #   stop("'single_source' can only be provided when 'data_object' has more than one data source")
-  # 
-  # case where n_sources is 1
-  #if (n_sources == 1) {
-    # extract parts from data_object
-    # x_data = data_object$X
-    # y_data = data_object$Y
-    # 
-    # part_info = attr(data_object, "partition_info")
-    # 
-    # # extract cnames
-    # sample_cname = attr(data_object, "cnames")$sample_cname
-    # outcome_cname = attr(data_object, "cnames")$outcome_cname
-    # pair_cname = attr(data_object, "cnames")$pair_cname
-    # 
-    # # sample_cname column index
-    # samp_ind = which(names(x_data) %in% sample_cname)
-    # 
-    # # loop over the list of methods and apply them with the MLwrapper_helper
-    # ml_rez = lapply(methods, MLwrapper_helper, x_data, y_data, part_info, scale_and_center, outcome_cname, pair_cname, sample_cname)
-    # names(ml_rez) = methods
-    # 
-    # attr(data_object, "ML_results") = ml_rez
-    # attr(data_object, "ML_method") = methods
-    # 
- # }
-   # else if (n_sources > 1) {
-    # check that the length of 'method' vector is equal to n_sources, note this does not apply when 'single_source' argument is
-    # provided
     if (is.null(single_source)) {
       if (length(methods) != n_sources) 
         stop("the number of methods provided in 'method' argument is not equal to the number of sources in 'data_object'")
@@ -87,8 +55,11 @@ MLwrapper = function(data_object, methods, scale_and_center = FALSE, single_sour
     
     names(ml_rez_list) = paste(names(x_data), names(ml_rez_list), sep = ".")
     
-    attr(data_object, "ML_results") = ml_rez_list
-    attr(data_object, "ML_method") = methods
+    results <- ml_rez_list
+    attr(results, "ML_method") = methods
+    attr(results, "single_source") = "multisource"
+    #attr(data_object, "ML_results") = ml_rez_list
+    #attr(data_object, "ML_method") = methods
     }
     # case where single_source is provided
     else if (!is.null(single_source)) {
@@ -119,14 +90,14 @@ MLwrapper = function(data_object, methods, scale_and_center = FALSE, single_sour
       names(ml_rez) = methods
       
       # add attributes to data_object
-      attr(data_object, "ML_results") = ml_rez
-      attr(data_object, "ML_method") = methods
-      attr(data_object, "single_source") = single_source
+      results <- ml_rez
+      attr(results, "ML_method") = methods
+      attr(results, "single_source") = single_source
       
     }
   #}
-  
-  return(data_object)
+  class(results) <- "ML_results"
+  return(results)
 }
 
 
@@ -166,27 +137,11 @@ MLwrapper_helper = function(method, X, data, partition_info, scale_and_center, o
       pred_prob <- attr(ml_method(X_train, X_test, train_class = as.factor(data[train_partition, outcome_cname]), prob = TRUE), 
                         "prob")
       train_time <- Sys.time() - start
-      # 
-      # pred_label <- as.numeric(apply(pred_prob, 1, function(x) names(x)[which.max(x)]))
-      # truth <- data[test_partition, outcome_cname, drop = FALSE]
-      # ID <- data[test_partition, sample_cname, drop = FALSE]
-      # res <- data.frame(PredictedProbs = pred_prob, PredictedLabel = pred_label, Truth = truth, SampleID = ID)
-      # attributes(res)$train_time <- train_time
     } else {
       # figure out the best way to scale and center the data
       #X_train <- scale(X[train_partition, ], scale = TRUE, center = TRUE)
       #X_test <- (X[test_partition, ] - attr(X_train, "scaled:center"))/attr(X_train, "scaled:scale")
       start <- Sys.time()
-      # model <- try(attr(ml_method(X_train, X_test, train_class = as.factor(data[train_partition, outcome_cname]), prob = TRUE), 
-      #                   "prob"))
-      # train_time <- Sys.time() - start
-      # }
-      # 
-      # pred_label <- as.numeric(apply(pred_prob, 1, function(x) names(x)[which.max(x)]))
-      # truth <- data[test_partition, outcome_cname, drop = FALSE]
-      # ID <- data[test_partition, sample_cname, drop = FALSE]
-      # res <- data.frame(PredictedProbs = pred_prob, PredictedLabel = pred_label, Truth = truth, SampleID = ID)
-      # attributes(res)$train_time <- train_time
       model <- try(ml_method(X = X[train_partition, , drop = FALSE], data = data[train_partition, , drop = FALSE], 
                              outcome_cname = outcome_cname, pair_cname = pair_cname))
       train_time <- Sys.time() - start
@@ -212,12 +167,6 @@ MLwrapper_helper = function(method, X, data, partition_info, scale_and_center, o
         colnames(pred_prob) <- c("0", "1")
       } else if(method=="nb"){
         pred_prob <- predict(model, newdata = X[test_partition, , drop = FALSE],type = "prob")
-        # if(all(is.nan(pred_prob))){
-        #   #replace this partition
-        #   pred_prob <- predict(model, newdata = X[test_partition, , drop = FALSE],type = "class")
-        #   pred_prob <- cbind(c(1-as.numeric(as.character(pred_prob))), c(as.numeric(as.character(pred_prob))))
-        #   colnames(pred_prob) <- c("0", "1")
-        # }
       } else if (method == "lr"){
         pred_prob <- predict(model, newdata = X[test_partition, , drop = FALSE], type = "response")
         odds <- exp(pred_prob)

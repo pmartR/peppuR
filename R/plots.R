@@ -12,40 +12,54 @@ NULL
 #' @return plots ggplot2 object
 #' @rdname plot-peppuR-MLinput
 #' @export
-plot.MLinput <- function(MLinput_object, order_plot = TRUE, ...) {
+plot.ML_results <- function(MLresults_object, order_plot = TRUE, ...) {
   require(ggplot2)
   require(gridExtra)
-  list(.plot.roc(MLinput_object, ...), .plot.data(MLinput_object, ...))
+  .plot.roc(MLresults_object, ...)
 }
 
-.plot.roc <- function(MLinput_object, order_plot = TRUE, x_lab = NULL, y_lab = NULL, plot_title = NULL, title_size = 14, x_lab_size = 11, y_lab_size = 11, bw_theme = FALSE) {
+.plot.roc <- function(MLresults_object, order_plot = TRUE, x_lab = NULL, y_lab = NULL, plot_title = NULL, title_size = 14, x_lab_size = 11, y_lab_size = 11, bw_theme = FALSE) {
   # check for a corRes object #
-  if(!inherits(MLinput_object, "MLinput")) stop("object must be of class MLinput'")
+  if(!inherits(MLresults_object, "ML_results")) stop("object must be of class ML_results'")
   # check title and colorbar options #
   if(!is.null(plot_title)) {
     if(!is.character(plot_title)) stop("plot_title must be a character vector")
   }
-  if(is.null(attr(MLinput_object, "ML_results"))) {
-    roc_plot <- NULL
-  } else {
-    output_probabilities <- attr(MLinput_object, "ML_results")
-    if(attr(MLinput_object, "n_sources") == 1){
+  # if(is.null(attr(MLinput_object, "ML_results"))) {
+  #   roc_plot <- NULL
+  # } else {
+    output_probabilities <- MLresults_object
+    if(length(output_probabilities) == 1){
       results <- output_probabilities[[1]]
-    } else {
-      results <- naiveIntegration(output_probabilities) 
+     } else if(attr(output_probabilities, "single_source") == "multisource"){
+       # are there multiple sources to be integrated?
+       results <- naiveIntegration(output_probabilities)
+     } else {
+       plot_metrics <- lapply(seq_along(MLresults_object), function(i,alg) {
+         metrics <- AUC::roc(predictions = alg[[i]]$PredictedProbs.1, labels = factor(alg[[i]]$Truth))  
+         Algorithm <- names(MLresults_object)[i]
+         plot_frame <- data.frame(fpr=metrics$fpr, tpr=metrics$tpr, Algorithm)
+         # ggplot(plot_frame, aes(x = fpr, y = tpr, color = Algorithm))+
+         #   geom_line()+
+         #   theme_bw()+
+         #   ggtitle(plot_title) 
+       }, alg = MLresults_object)
+       metrics <- do.call("rbind", plot_metrics)
+       roc_plot <- ggplot(metrics, aes(x = fpr, y = tpr, color = Algorithm))+
+         geom_line()+
+         theme_bw()+
+         ggtitle(attr(MLresults_object, "single_source")) 
+       return(roc_plot)
+      # there are multiple algorithms to compare
     }
     metrics <- AUC::roc(predictions = results$PredictedProbs.1, labels = factor(results$Truth))  
     roc_plot <- ggplot(data.frame(fpr = metrics$fpr, tpr = metrics$tpr), aes(x = fpr, y = tpr))+
       geom_line(color = "blue")+
       theme_bw()+
       ggtitle(plot_title)  
-  }
+  #}
   return(roc_plot)
   
-}
-
-.plot.data <- function(MLinput_object, x_lab = NULL, y_lab = NULL, plot_title = NULL, title_size = 14, x_lab_size = 11, y_lab_size = 11, bw_theme = FALSE) {
-  warning("Data plotting not yet implemented")
 }
 
 #' plot.featSelect

@@ -28,9 +28,9 @@ test_that("selection works", {
   expect_s3_class(testa, "mlSelect")
 })
 
-p <- plot(testa, roc_curves = TRUE, time_chart = TRUE)
-
-test_that("plotting works", {
-  expect_true(is(p[[1]], "gtable"))
-  expect_true(is(p[[2]], "ggplot"))
-})
+# p <- plot(testa, roc_curves = TRUE, time_chart = TRUE)
+# 
+# test_that("plotting works", {
+#   expect_true(is(p[[1]], "gtable"))
+#   expect_true(is(p[[2]], "ggplot"))
+# })

@@ -22,7 +22,7 @@ rf_results <- MLwrapper(data_object = single_source_peppuRobj, methods = "rf")
 #other_results <- MLSelection(single_source_peppuRobj)
 #plot_results <- plot(other_results)
 test_that("Random Forest completed", {
-  expect_true(grepl("rf", names(attr(rf_results, "ML_results"))))
+  expect_true(grepl("rf", names(rf_results)))
   #expect_equal(class(other_results), c("mlSelect", "list"))
  # expect_length(plot_results, 2)
 })

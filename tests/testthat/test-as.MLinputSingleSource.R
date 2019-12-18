@@ -30,7 +30,7 @@ test_that("Categorical checks single source as.MLinput", {
   expect_equal(attr(as.MLinput(X = birthweight_data[, !colnames(birthweight_data) %in% c("race", "smoke", "ht", "ui")],
                Y = NULL, meta_colnames = c("low", "ID"),
                categorical_features = FALSE , sample_cname = sample_cname,
-               outcome_cname = outcome_cname, pair_cname = pair_cname), "categorical_columns")$categorical_cols, NULL)
+               outcome_cname = outcome_cname, pair_cname = pair_cname), "categorical_columns")$categorical_cols, "none")
 })
 
 
